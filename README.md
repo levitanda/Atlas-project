@@ -2,7 +2,7 @@
 ## General information about the project 
 ### System Architecture
 The system builded from 3 main parts:
-* Ripe Atlas - DNS measurements database.
+* Ripe Atlas - measurements database.
 * Django - web server that will serve the GUI as API , and will enacpsulate the ripe atlas API calls for the fronend.
 * React - frontend that will show the GUI to the user.
 ### Functional requirements 
@@ -21,6 +21,8 @@ The system builded from 3 main parts:
 We don't use any database ,we will only use ripe atlas API , process it and send it to the frontend.
 ### Deployment and Infrastructure Design
 All the system runs on localhost , no need for any external infrastructure. User only need to run a server and open the web page.
+### User Interface Design
+![UI](NewScreen-0de8f.jpeg)
 ### System Components and Modules Design
 * [Ripe Atlas Cousteau](https://ripe-atlas-cousteau.readthedocs.io/en/latest/) - python library that encapsulate the ripe atlas API requests.
 * [Ripe Atlas Sagan](https://ripe-atlas-cousteau.readthedocs.io/en/latest/) - python library ,that encapsulate the ripe atlas API responses parcing and aggregation.
@@ -44,7 +46,7 @@ All the system runs on localhost , no need for any external infrastructure. User
 ### Overview and Purpose
 To give to user possibility to check worldwide DNS stablity using GUI interface.
 ### User Interface Design
-![UI](DNS_UI_mock.png)
+![UI](DNSstabilitycheck-9b455.jpeg)
 
 ### Algorithms and System Logic
 #### User story 
@@ -90,12 +92,12 @@ sequenceDiagram
 ### Overview and Purpose
 The Interconnectivity of AS use case aims to dynamically represent the state of interconnection between different Autonomous Systems (ASes) and the hegemony value of the connection. Users can also observe the change in interconnectivity over different dates. 
 ### User interface design
+![UI](InterconnectivityofAS-f5e7f.jpeg)
 ### Algorithms and System Logic
 #### User story
 1. User choose AS.
-2. User chooses the date (default - today) or a specific date range to observe the dynamic changes over time.
+2. User chooses the date (default - today).
 3. The user is presented with a graph that represents ASes as nodes and their connections as edges to visualize therouting between different ASes. The edge color will depend on hegemony value of the connection. 
-(https://github.com/wikicensorship/tracevis)
 https://observablehq.com/@tasos/depedency-timeseries?collection=@tasos/reusable-ihr-plots
 
 #### System logic
@@ -132,9 +134,8 @@ sequenceDiagram
 ## IPv6 Deployment
 ### Overview and Purpose
 The IPv6 Deployment use case aims to dynamically show users the state of IPv6 deployment worldwide. Users will be able to visualize the level of IPv6 routing in different countries based on the given date. 
-
 ### User Interface Design
-
+![UI](IPv6Deployment-0e3c0.jpeg)
 ### Algorithms and System Logic
 #### User Story
 1. User choose the country.
@@ -179,7 +180,7 @@ The development stages for the IPv6 Deployment use case can be summarized as fol
 The Analysis of Network Latency Worldwide use case aims to provide users with information about the median latency between a given Autonomous System Number (ASN) and other ASNs worldwide for a specific date. Users will be able to visualize network latency on a worldwide map, with red rods indicating high latency and green dots representing low latency.
 
 ### User Interface Design
-
+![UI](MedianlatencyperAS-7e78f.jpeg)
 
 ### Algorithms and System Logic
 #### User Story
