@@ -22,7 +22,7 @@ We don't use any database ,we will only use ripe atlas API , process it and send
 ### Deployment and Infrastructure Design
 All the system runs on localhost , no need for any external infrastructure. User only need to run a server and open the web page.
 ### User Interface Design
-![UI](NewScreen-0de8f.jpeg)
+![UI](images\NewScreen-0de8f.jpeg)
 ### System Components and Modules Design
 * [Ripe Atlas Cousteau](https://ripe-atlas-cousteau.readthedocs.io/en/latest/) - python library that encapsulate the ripe atlas API requests.
 * [Ripe Atlas Sagan](https://ripe-atlas-cousteau.readthedocs.io/en/latest/) - python library ,that encapsulate the ripe atlas API responses parcing and aggregation.
@@ -46,7 +46,7 @@ All the system runs on localhost , no need for any external infrastructure. User
 ### Overview and Purpose
 To give to user possibility to check worldwide DNS stablity using GUI interface.
 ### User Interface Design
-![UI](DNSstabilitycheck-9b455.jpeg)
+![UI](images\DNSstabilitycheck-9b455.jpeg)
 
 ### Algorithms and System Logic
 #### User story 
@@ -92,7 +92,7 @@ sequenceDiagram
 ### Overview and Purpose
 The Interconnectivity of AS use case aims to dynamically represent the state of interconnection between different Autonomous Systems (ASes) and the hegemony value of the connection. Users can also observe the change in interconnectivity over different dates. 
 ### User interface design
-![UI](InterconnectivityofAS-f5e7f.jpeg)
+![UI](images\InterconnectivityofAS-f5e7f.jpeg)
 ### Algorithms and System Logic
 #### User story
 1. User choose AS.
@@ -135,7 +135,7 @@ sequenceDiagram
 ### Overview and Purpose
 The IPv6 Deployment use case aims to dynamically show users the state of IPv6 deployment worldwide. Users will be able to visualize the level of IPv6 routing in different countries based on the given date. 
 ### User Interface Design
-![UI](IPv6Deployment-0e3c0.jpeg)
+![UI](images\IPv6Deployment-0e3c0.jpeg)
 ### Algorithms and System Logic
 #### User Story
 1. User choose the country.
@@ -180,7 +180,7 @@ The development stages for the IPv6 Deployment use case can be summarized as fol
 The Analysis of Network Latency Worldwide use case aims to provide users with information about the median latency between a given Autonomous System Number (ASN) and other ASNs worldwide for a specific date. Users will be able to visualize network latency on a worldwide map, with red rods indicating high latency and green dots representing low latency.
 
 ### User Interface Design
-![UI](MedianlatencyperAS-7e78f.jpeg)
+![UI](images\MedianlatencyperAS-7e78f.jpeg)
 
 ### Algorithms and System Logic
 #### User Story
@@ -220,3 +220,95 @@ The development stages for the Analysis of Network Latency Worldwide use case ca
    1. Provide input fields for users to enter the ASN or country and select the date.
    2. Develop the worldwide map component.
    3. Configure API calls to the server to retrieve network latency data.
+
+## Zombie BGP
+### Overview and Purpose
+The Zombie BGP use case aims to show the frequency of zombie appearances. Zombies are BGP announcements that reappear after being withdrawn. Users will be able to compare the occurrence of zombie outbreaks between two different dates. The data will be normalized by the number of times beacons have been withdrawn during our measurement study.
+
+### User Interface Design
+![UI](images\ZombieBGP-66e88.jpeg)
+
+### Algorithms and System Logic
+#### User Story
+1. User enters the beacon.
+2. User selects the date for comparing 1 and date for comparing 2.
+3. The program calculates the number of outbreaks that occurred simultaneously but on different dates, normalized by the number of times beacons have been withdrawn during the measurement study.
+4. The GUI displays a graph with the CDF dimension and the number of simultaneous outbreaks.
+
+#### System Logic
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Backend
+    User->>Frontend: Enter web page
+    User->>Frontend: Enter beacon, date for comparing 1, and date for comparing 2
+    Frontend->>Backend: Send request for data
+    Backend->>Backend: Perform calculations based on the given inputs
+    Backend->>Frontend: Send data to frontend
+    Frontend->>Frontend: Show graph with CDF dimension and number of simultaneous outbreaks to user
+```
+
+### Testing
+To ensure the proper functioning of the Zombie BGP use case, the following testing approach can be employed:
+* Unit tests for all server core components (Django) to verify the expected behavior of the server.
+* Manual testing of the user interface to ensure a seamless and intuitive user experience.
+
+### Development Stages
+The development stages for the Zombie BGP use case can be summarized as follows:
+1. Expand the server functionality
+   1. Create new API endpoints to handle Zombie BGP requests.
+   2. Implement functions to calculate the number of simultaneous outbreaks based on the given inputs.
+   3. Perform necessary data normalization and processing.
+   4. Create basic tests for the newly implemented server functionalities.
+2. Enhance the user interface
+   1. Provide input fields for users to enter the beacon, date for comparing 1, and date for comparing 2.
+   2. Develop the graph component with the CDF dimension and the number of simultaneous outbreaks.
+   3. Configure API calls to the server to retrieve Zombie BGP data.
+
+
+## Traffic Flow in IXPs
+### Overview and Purpose
+The Traffic Flow in IXPs use case aims to analyze the amount of traffic in Internet Exchange Points (IXPs) over a specific time period. By plotting a graph that depicts the dependency of traffic on dates, users can gain insights into the patterns and fluctuations of traffic within the selected IXP.
+
+### User Interface Design
+![UI](images\TrafficflowinIXP-6273a.jpeg)
+
+### Algorithms and System Logic
+#### User Story
+1. User enters the IXP, start date, and finish date.
+2. The program retrieves the traffic data for the specified IXP and time range.
+3. The GUI displays a graph showing the amount of traffic as a dependency on dates.
+
+#### System Logic
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Backend
+    User->>Frontend: Enter web page
+    User->>Frontend: Enter IXP, start date, and finish date
+    Frontend->>Backend: Send request for traffic data
+    Backend->>Backend: Retrieve traffic data for the specified IXP and time range
+    Backend->>Frontend: Send traffic data to frontend
+    Frontend->>Frontend: Generate graph with time and amount of traffic dimensions
+    Frontend->>Frontend: Display graph to user
+```
+
+### Testing
+To ensure the proper functioning of the Traffic Flow in IXPs use case, the following testing approach can be employed:
+* Unit tests for all server core components (Django) to verify the expected behavior of the server.
+* Manual testing of the user interface to ensure a seamless and intuitive user experience.
+
+### Development Stages
+The development stages for the Traffic Flow in IXPs use case can be summarized as follows:
+1. Expand the server functionality
+   1. Create new API endpoints to handle traffic data requests for specific IXPs and time ranges.
+   2. Implement functions to retrieve the relevant traffic data from the database based on the given inputs.
+   3. Perform any necessary data preprocessing or filtering.
+   4. Create basic tests for the newly implemented server functionalities.
+2. Enhance the user interface
+   1. Provide input fields for users to enter the IXP, start date, and finish date.
+   2. Develop the graph component with the dimensions of time and amount of traffic.
+   3. Configure API calls to the server to retrieve traffic data for the selected IXP and time range.
+   4. Display the generated graph to the user in the GUI.
