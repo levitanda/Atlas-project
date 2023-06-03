@@ -1,5 +1,5 @@
 ## Initial Setup Guide
-
+### Initialization of Backend
 1. [Install the latest version of Python](https://www.python.org/downloads/).
 2. [Install the latest version of Git](https://git-scm.com/downloads).
 3. [Install the latest version of Visual Studio Code](https://code.visualstudio.com/download).
@@ -13,4 +13,10 @@
 8. in ./src/Backend/ create a new django project named **RAICAT** using the following command(don't forget to enter to root folder **src** before run the command):
     ```bash
     django-admin startproject RAICAT ./src/Backend
+    ```
+### Initialization of Frontend
+1. [Install the latest version of Node.js](https://nodejs.org/en/download/).
+2. Create new react app using the following command:
+    ```bash
+    npx create-react-app ./src/Frontend --template cra-template-redux
     ```
