@@ -46,7 +46,7 @@ All the system runs on localhost , no need for any external infrastructure. User
 ### Overview and Purpose
 To give to user possibility to check worldwide DNS stablity using GUI interface.
 ### User Interface Design
-![UI](images\DNSstabilitycheck-9b455.jpeg)
+![UI](images/DNSstabilitycheck-9b455.jpeg)
 
 ### Algorithms and System Logic
 #### User story 
@@ -92,7 +92,7 @@ sequenceDiagram
 ### Overview and Purpose
 The Interconnectivity of AS use case aims to dynamically represent the state of interconnection between different Autonomous Systems (ASes) and the hegemony value of the connection. Users can also observe the change in interconnectivity over different dates. 
 ### User interface design
-![UI](images\InterconnectivityofAS-f5e7f.jpeg)
+![UI](images/InterconnectivityofAS-f5e7f.jpeg)
 ### Algorithms and System Logic
 #### User story
 1. User choose AS.
@@ -135,7 +135,7 @@ sequenceDiagram
 ### Overview and Purpose
 The IPv6 Deployment use case aims to dynamically show users the state of IPv6 deployment worldwide. Users will be able to visualize the level of IPv6 routing in different countries based on the given date. 
 ### User Interface Design
-![UI](images\IPv6Deployment-0e3c0.jpeg)
+![UI](images/IPv6Deployment-0e3c0.jpeg)
 ### Algorithms and System Logic
 #### User Story
 1. User choose the country.
@@ -180,7 +180,7 @@ The development stages for the IPv6 Deployment use case can be summarized as fol
 The Analysis of Network Latency Worldwide use case aims to provide users with information about the median latency between a given Autonomous System Number (ASN) and other ASNs worldwide for a specific date. Users will be able to visualize network latency on a worldwide map, with red rods indicating high latency and green dots representing low latency.
 
 ### User Interface Design
-![UI](images\MedianlatencyperAS-7e78f.jpeg)
+![UI](images/MedianlatencyperAS-7e78f.jpeg)
 
 ### Algorithms and System Logic
 #### User Story
@@ -226,7 +226,7 @@ The development stages for the Analysis of Network Latency Worldwide use case ca
 The Zombie BGP use case aims to show the frequency of zombie appearances. Zombies are BGP announcements that reappear after being withdrawn. Users will be able to compare the occurrence of zombie outbreaks between two different dates. The data will be normalized by the number of times beacons have been withdrawn during our measurement study.
 
 ### User Interface Design
-![UI](images\ZombieBGP-66e88.jpeg)
+![UI](images/ZombieBGP-66e88.jpeg)
 
 ### Algorithms and System Logic
 #### User Story
@@ -272,7 +272,7 @@ The development stages for the Zombie BGP use case can be summarized as follows:
 The Traffic Flow in IXPs use case aims to analyze the amount of traffic in Internet Exchange Points (IXPs) over a specific time period. By plotting a graph that depicts the dependency of traffic on dates, users can gain insights into the patterns and fluctuations of traffic within the selected IXP.
 
 ### User Interface Design
-![UI](images\TrafficflowinIXP-6273a.jpeg)
+![UI](images/TrafficflowinIXP-6273a.jpeg)
 
 ### Algorithms and System Logic
 #### User Story
