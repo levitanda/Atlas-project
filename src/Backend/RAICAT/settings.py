@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cra_helper',
+    # ! this is connector for the frontend react app
     'django.contrib.staticfiles',
 ]
 
@@ -54,7 +56,8 @@ ROOT_URLCONF = 'RAICAT.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR / "templates",],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -62,6 +65,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'cra_helper.context_processors.static'
             ],
         },
     },
@@ -115,8 +119,18 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
-
+STATICFILES_FINDERS = [
+    # Required for CRAManifestFinder below to work
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    # A finder to pull in asset-manifest.json
+    'cra_helper.finders.CRAManifestFinder',
+]
+STATIC_ROOT = BASE_DIR / 'static'
+DEBUG = True
+CRA_APP_NAME = BASE_DIR.parent / 'frontend'
+STATIC_URL = 'frontend/build/static/'
+CRA_PACKAGE_JSON_HOMEPAGE = '../frontend'
+ALLOWED_HOSTS = ['*']
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 

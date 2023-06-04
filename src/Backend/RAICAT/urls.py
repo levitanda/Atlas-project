@@ -15,8 +15,19 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path
+from django.conf import settings
+from cra_helper.views import proxy_cra_requests
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('raicat/', TemplateView.as_view(template_name='entry_point.html')),
 ]
+if settings.DEBUG:
+    proxy_urls = [
+        re_path(r'^__webpack_dev_server__/(?P<path>.*)$', proxy_cra_requests),
+        re_path(r'^(?P<path>.+\.hot-update\.(js|json|js\.map))$',
+                proxy_cra_requests),
+    ]
+    urlpatterns.extend(proxy_urls)
