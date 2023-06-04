@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	{% block title %}<title>Pathfinder</title>{% endblock %}
+	{% block extracss %}{% endblock %}
+</head>
+
+<body>
+{% block content %}<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"/>{% endblock %}
+{% if bundle_js %}
+  {% for file_url in bundle_js %}
+<script type="text/javascript" src="{{ file_url }}"></script>
+  {% endfor %}
+{% endif %}
+{% if not bundle_js %}
+{% load static %}
+{% for file in entrypoints.css %}
+<link href="{% static file %}" rel="stylesheet">
+{% endfor %}
+{% for file in entrypoints.js %}
+<script type="text/javascript" src="{% static file %}"></script>
+{% endfor %}
+{% endif %}
+{% block script %}{% endblock %}
+</body>
+</html>
+
+
+entry point
+
+{% extends "base.html" %}
+{% comment %} {% load render_bundle from webpack_loader %} {% endcomment %}
+{% block extracss %}
+	{{ block.super }}
+{% endblock %}
+{% block content %}
+	<div id="root"></div>
+{% endblock %}
+{% block script %}
+	{{ block.super }}
+{% endblock %}
