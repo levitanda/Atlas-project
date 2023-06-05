@@ -6,7 +6,7 @@
     ```
 2. ```bash
     ... # entrer venv setup
-    cd src/backend
+    cd src/Backend
     pip install -r requirements.txt
     ```
 ## Running the project
@@ -16,6 +16,6 @@
     ```
 2. ```bash 
     ... # entrer venv setup
-    cd src/backend
+    cd src/Backend
     python manage.py runserver
     ```
