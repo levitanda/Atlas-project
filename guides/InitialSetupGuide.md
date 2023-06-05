@@ -20,3 +20,8 @@
     ```bash
     npx create-react-app ./src/Frontend --template cra-template-redux
     ```
+3. Install all the dependencies using the following command:
+    ```bash
+    cd src/frontend
+    npm install
+    ```
