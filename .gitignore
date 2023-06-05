@@ -1,2 +1,5 @@
 venv/
 myworld/
+src/frontend/build/
+src/frontend/node_modules/
+*pyc*
