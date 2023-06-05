@@ -118,18 +118,19 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-
+# STATICFILES_DIRS = []
 STATICFILES_FINDERS = [
     # Required for CRAManifestFinder below to work
     'django.contrib.staticfiles.finders.FileSystemFinder',
     # A finder to pull in asset-manifest.json
     'cra_helper.finders.CRAManifestFinder',
 ]
+STATICFILE_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_ROOT = BASE_DIR / 'static'
 DEBUG = True
 CRA_APP_NAME = BASE_DIR.parent / 'frontend'
-STATIC_URL = 'frontend/build/static/'
-CRA_PACKAGE_JSON_HOMEPAGE = '../frontend'
+STATIC_URL = 'frontend/build/'
+CRA_PACKAGE_JSON_HOMEPAGE = '/frontend/build/'
 ALLOWED_HOSTS = ['*']
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
