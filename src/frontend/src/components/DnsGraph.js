@@ -13,8 +13,12 @@ import Container from 'react-bootstrap/Container';
 
 const MapChart = memo(({ setTooltipContent }) => {
     return (
-        <Container id="map" fluid={"l"}>
-            <ComposableMap >
+        <Container id="map" >
+            <ComposableMap style={{
+                width: '100%',
+                height: '90vh',
+                border: '1px solid black'
+            }}>
                 <ZoomableGroup>
                     <Geographies geography={geojson}>
                         {({ geographies }) =>
