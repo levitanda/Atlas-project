@@ -1,21 +1,31 @@
-import { Tabs, Tab } from 'react-bootstrap';
-function TabbedLayout() {
+import { useState } from 'react';
+import Tab from 'react-bootstrap/Tab';
+import Stack from 'react-bootstrap/Stack';
+import Tabs from 'react-bootstrap/Tabs';
+import Graph from "./DnsGraph";
+
+function ControlledTabsExample() {
+    const [key, setKey] = useState('DNS');
+
     return (
-        <Tabs defaultActiveKey="home" id="tabbed-layout">
-            <Tab eventKey="home" title="Home">
-                <h3>Home Content</h3>
-                <p>This is the home tab content.</p>
+        <Tabs
+            id="controlled-tab-example"
+            activeKey={key}
+            onSelect={(k) => setKey(k)}
+        // className="mb-3"
+        >
+            <Tab eventKey="DNS" title="DNS availability">
+                <Graph />
             </Tab>
-            <Tab eventKey="profile" title="Profile">
-                <h3>Profile Content</h3>
-                <p>This is the profile tab content.</p>
-            </Tab>
-            <Tab eventKey="contact" title="Contact">
-                <h3>Contact Content</h3>
-                <p>This is the contact tab content.</p>
+            <Tab eventKey="IPv6" title="IPv6 deployment">
+                <Stack gap={3}>
+                    <div className="bg-warning border">First item</div>
+                    <div className="bg-warning border">Second item</div>
+                    <div className="bg-warning border">Third item</div>
+                </Stack>
             </Tab>
         </Tabs>
     );
 }
 
-export default TabbedLayout;
+export default ControlledTabsExample;
