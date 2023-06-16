@@ -19,9 +19,10 @@ from django.urls import path, re_path
 from django.conf import settings
 from cra_helper.views import proxy_cra_requests
 from django.views.generic import TemplateView
-
+from .views import dns_data
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('dns_data/', dns_data, name='dns_data'),
     path('raicat/', TemplateView.as_view(template_name='entry_point.html')),
 ]
 if settings.DEBUG:
