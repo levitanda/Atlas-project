@@ -1,5 +1,5 @@
 
-import React, { useState, memo } from "react";
+import React, { useState, useEffect, memo } from "react";
 import {
     ZoomableGroup,
     ComposableMap,
@@ -18,25 +18,27 @@ const colorScale = scaleLinear()
 function getRandomFloat(min, max) {
     return Math.random() * (max - min) + min;
 }
-const DateTimeForm = () => {
+const DateTimeForm = ({ updateDatesFunction, chosenDates }) => {
     const handleSubmit = (event) => {
         event.preventDefault();
-        // Handle form submission
+        const data = new FormData(event.target);
+        const [date1, date2] = [data.get('date'), data.get('date2')];
+        updateDatesFunction({ "date1": date1, "date2": date2 });
     };
 
     return (
         <Form onSubmit={handleSubmit}>
             <Row className="align-items-end">
                 <Col md={4}>
-                    <Form.Group controlId="date">
+                    <Form.Group controlId="date1">
                         <Form.Label>Start Date</Form.Label>
-                        <Form.Control type="date" />
+                        <Form.Control type="date" value={chosenDates["date1"]} />
                     </Form.Group>
                 </Col>
                 <Col md={4}>
                     <Form.Group controlId="date2">
                         <Form.Label>End Date</Form.Label>
-                        <Form.Control type="date" />
+                        <Form.Control type="date" value={chosenDates["date2"]} />
                     </Form.Group>
                 </Col>
                 <Col md={4} className="d-flex align-items-end justify-content-center">
@@ -51,7 +53,24 @@ const DateTimeForm = () => {
 
 const MapChart = memo(({ setTooltipContent }) => {
     const [data, setData] = useState([]);
+    const get_current_date = () => new Date().toISOString().split("T")[0]
+    const [dates, setDates] = useState({ "date1": get_current_date(), "date2": get_current_date() });
 
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch('/dns_data/');
+                const jsonData = await response.json();
+                setData(jsonData);
+                console.log(jsonData)
+            } catch (error) {
+                console.log(error.message)
+            }
+        };
+
+        fetchData();
+        console.log(dates)
+    }, [dates]);
     return (
         <Container id="map"  >
             <Row>
@@ -100,7 +119,7 @@ const MapChart = memo(({ setTooltipContent }) => {
             </Row>
             <Row>
                 <Col>
-                    <DateTimeForm />
+                    <DateTimeForm updateDatesFunction={setDates} chosenDates={dates} />
                 </Col>
             </Row>
         </Container >
@@ -112,7 +131,7 @@ function Graph() {
     return (
         <div>
             <MapChart setTooltipContent={setContent} />
-            <Tooltip anchorId="map" content={content} float />
+            <Tooltip anchorSelect="#map" content={content} float />
         </div>
     );
 }
