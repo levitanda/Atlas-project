@@ -22,7 +22,8 @@ from django.views.generic import TemplateView
 from .views import dns_data
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('dns_data/', dns_data, name='dns_data'),
+    re_path(
+        r'^dns_data/first_date=(?P<first_date>\d{4}-\d{2}-\d{2})&second_date=(?P<second_date>\d{4}-\d{2}-\d{2})/$', dns_data, name='dns_data'),
     path('raicat/', TemplateView.as_view(template_name='entry_point.html')),
 ]
 if settings.DEBUG:
