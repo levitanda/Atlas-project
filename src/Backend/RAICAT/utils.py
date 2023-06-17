@@ -4,6 +4,7 @@ from ripe.atlas.sagan import Result, DnsResult
 import pydash as _
 import pycountry
 from ipwhois import IPWhois
+import concurrent.futures
 
 STOPPED = 4
 
@@ -98,12 +99,24 @@ def merge_measurement_results(measurement_hash, previous_results):
         return previous_results
 
 
-def compute_average_by_country(results):
-    def compute_average(x):
-        if len(x) == 0:
-            return 0
-        return sum(x) / len(x)
+def compute_average(x):
+    if len(x) == 0:
+        return 0
+    return round(sum(x) / len(x), 1)
 
+
+def convert_two_letter_to_three_letter_code(two_letter_code):
+    try:
+        country = pycountry.countries.get(alpha_2=two_letter_code)
+        if country:
+            return country.alpha_3
+        else:
+            return None
+    except LookupError:
+        return None
+
+
+def compute_average_by_country(results):
     result_by_country = (
         _.chain(
             _.group_by(
@@ -132,31 +145,20 @@ def compute_average_by_country(results):
     return result_by_country
 
 
+def prepare_results_for_frontend(results):
+    return {
+        "data": results,
+        "min": min(list(results.values()) + [0]),
+        "max": max(list(results.values()) + [0]),
+        "average": compute_average(results.values()),
+    }
+
+
 def check_dns_measurements(date):
     measurements = get_measurements_collection_by_date_and_type(date, "dns")
     results = []
     for measurement in measurements:
-        # print('Measurement ID:', measurement.get("id"))
-        # print('Start Time:', datetime.fromtimestamp(
-        #     measurement.get("start_time")))
-        # print('Stop Time:', datetime.fromtimestamp(
-        #     measurement.get("stop_time")))
-        # print(
-        #     f"Query: {measurement.get('af')} {measurement.get('query_argument')} {measurement.get('query_type')}")
-        # print('Results Link:', measurement.get("result"))
-        # print('----')
         measurement_hash = create_measurement_hash(measurement.get("id"))
         results = merge_measurement_results(measurement_hash, results)
-        grouped_result = compute_average_by_country(results)
-    return grouped_result
-
-
-def convert_two_letter_to_three_letter_code(two_letter_code):
-    try:
-        country = pycountry.countries.get(alpha_2=two_letter_code)
-        if country:
-            return country.alpha_3
-        else:
-            return None
-    except LookupError:
-        return None
+    grouped_result = compute_average_by_country(results)
+    return prepare_results_for_frontend(grouped_result)
