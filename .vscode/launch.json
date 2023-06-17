@@ -14,6 +14,13 @@
             ],
             "django": true,
             "justMyCode": false
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "React Debug",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}"
         }
     ]
 }
