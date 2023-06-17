@@ -20,16 +20,22 @@ from django.conf import settings
 from cra_helper.views import proxy_cra_requests
 from django.views.generic import TemplateView
 from .views import dns_data
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
     re_path(
-        r'^dns_data/first_date=(?P<first_date>\d{4}-\d{2}-\d{2})&second_date=(?P<second_date>\d{4}-\d{2}-\d{2})/$', dns_data, name='dns_data'),
-    path('raicat/', TemplateView.as_view(template_name='entry_point.html')),
+        r"^dns_data/first_date=(?P<first_date>\d{4}-\d{2}-\d{2})&second_date=(?P<second_date>\d{4}-\d{2}-\d{2})/$",
+        dns_data,
+        name="dns_data",
+    ),
+    path("raicat/", TemplateView.as_view(template_name="entry_point.html")),
 ]
 if settings.DEBUG:
     proxy_urls = [
-        re_path(r'^__webpack_dev_server__/(?P<path>.*)$', proxy_cra_requests),
-        re_path(r'^(?P<path>.+\.hot-update\.(js|json|js\.map))$',
-                proxy_cra_requests),
+        re_path(r"^__webpack_dev_server__/(?P<path>.*)$", proxy_cra_requests),
+        re_path(
+            r"^(?P<path>.+\.hot-update\.(js|json|js\.map))$",
+            proxy_cra_requests,
+        ),
     ]
     urlpatterns.extend(proxy_urls)
