@@ -1,34 +1,25 @@
 from datetime import datetime
-from ripe.atlas.cousteau import AtlasRequest, AtlasResultsRequest
+from typing import List, Dict, Union
+from ripe.atlas.cousteau import AtlasRequest
 from ripe.atlas.sagan import Result, DnsResult
 import pydash as _
 import pycountry
 from ipwhois import IPWhois
 import concurrent.futures
 
-STOPPED = 4
+STOPPED: int = 4
 
 
-def get_measurements_collection_by_date_and_type(date, measurement_type):
-    timestamp = datetime.strptime(date, "%Y-%m-%d").timestamp()
-    filters = {
-        "type": measurement_type,
-        "status": STOPPED,
-        "start_time__gte": timestamp,
-        "start_time__lt": timestamp + 24 * 60 * 60,
-        "fields": "id,start_time,stop_time,af,query_argument,query_type,result",
-    }
-    url_path = "/api/v2/measurements/"
-    is_success, response = AtlasRequest(**{"url_path": url_path}).get(
-        **filters
-    )
-    if is_success:
-        return response["results"]
-    else:
-        return None
+def get_measurement_results(measurement_id: int) -> Union[Dict, None]:
+    """
+    Given a measurement ID, returns the results of the measurement.
 
+    Args:
+        measurement_id (int): The ID of the measurement.
 
-def get_measurement_results(measurement_id):
+    Returns:
+        Union[Dict, None]: A dictionary containing the results of the measurement, or None if the request failed.
+    """
     url_path = f"/api/v2/measurements/{measurement_id}/results/"
     is_success, response_results = AtlasRequest(**{"url_path": url_path}).get()
     if is_success:
@@ -37,7 +28,16 @@ def get_measurement_results(measurement_id):
         return None
 
 
-def get_probes_geolocation_list_by_id(probe_id_list):
+def get_probes_geolocation_list_by_id(probe_id_list: List[str]) -> List[Dict]:
+    """
+    Given a list of probe IDs, returns a list of dictionaries containing the geolocation information for each probe.
+
+    Args:
+        probe_id_list (List[str]): A list of probe IDs.
+
+    Returns:
+        List[Dict]: A list of dictionaries containing the geolocation information for each probe.
+    """
     url_path = "/api/v2/probes/"
     result = []
     for sub_list in [
@@ -53,14 +53,33 @@ def get_probes_geolocation_list_by_id(probe_id_list):
     return result
 
 
-def map_measurement_result_to_probe_info(parsed_result):
+def map_measurement_result_to_probe_info(parsed_result: Result) -> Dict:
+    """
+    Given a parsed measurement result, returns a dictionary containing the probe ID and RTT results.
+
+    Args:
+        parsed_result (Result): A parsed measurement result.
+
+    Returns:
+        Dict: A dictionary containing the probe ID and RTT results.
+    """
     return {
         "probe_id": parsed_result.probe_id,
         "rtt_results": [parsed_result.responses[0].response_time],
     }
 
 
-def create_measurement_hash(measurement_id):
+def create_measurement_hash(measurement_id: int) -> List[Dict]:
+    """
+    Given a measurement ID, returns a list of dictionaries containing the probe ID, RTT results, and geolocation information for each probe.
+
+    Args:
+        measurement_id (int): The ID of the measurement.
+
+    Returns:
+        List[Dict]: A list of dictionaries containing the probe ID, RTT results, and geolocation information for each probe.
+    """
+
     def find_object_by_id(collection, id):
         for obj in collection:
             if obj["id"] == id:
@@ -83,7 +102,19 @@ def create_measurement_hash(measurement_id):
     return probes_information
 
 
-def merge_measurement_results(measurement_hash, previous_results):
+def merge_measurement_results(
+    measurement_hash: List[Dict], previous_results: List[Dict]
+) -> List[Dict]:
+    """
+    Given a list of dictionaries containing the probe ID, RTT results, and geolocation information for each probe, and a list of previous results, returns a merged list of dictionaries containing the probe ID, RTT results, and geolocation information for each probe.
+
+    Args:
+        measurement_hash (List[Dict]): A list of dictionaries containing the probe ID, RTT results, and geolocation information for each probe.
+        previous_results (List[Dict]): A list of previous results.
+
+    Returns:
+        List[Dict]: A merged list of dictionaries containing the probe ID, RTT results, and geolocation information for each probe.
+    """
     if previous_results == []:
         return measurement_hash
     else:
@@ -99,13 +130,33 @@ def merge_measurement_results(measurement_hash, previous_results):
         return previous_results
 
 
-def compute_average(x):
+def compute_average(x: List[float]) -> float:
+    """
+    Given a list of floats, returns the average of the list.
+
+    Args:
+        x (List[float]): A list of floats.
+
+    Returns:
+        float: The average of the list.
+    """
     if len(x) == 0:
         return 0
     return round(sum(x) / len(x), 1)
 
 
-def convert_two_letter_to_three_letter_code(two_letter_code):
+def convert_two_letter_to_three_letter_code(
+    two_letter_code: str,
+) -> Union[str, None]:
+    """
+    Given a two-letter country code, returns the corresponding three-letter country code.
+
+    Args:
+        two_letter_code (str): A two-letter country code.
+
+    Returns:
+        Union[str, None]: The corresponding three-letter country code, or None if the code is invalid.
+    """
     try:
         country = pycountry.countries.get(alpha_2=two_letter_code)
         if country:
@@ -113,6 +164,37 @@ def convert_two_letter_to_three_letter_code(two_letter_code):
         else:
             return None
     except LookupError:
+        return None
+
+
+def get_measurements_collection_by_date_and_type(
+    date: str, measurement_type: str
+) -> Union[List[Dict], None]:
+    """
+    Given a date and measurement type, returns a list of dictionaries containing information about the measurements.
+
+    Args:
+        date (str): The date in the format "YYYY-MM-DD".
+        measurement_type (str): The type of measurement.
+
+    Returns:
+        Union[List[Dict], None]: A list of dictionaries containing information about the measurements, or None if the request failed.
+    """
+    timestamp = datetime.strptime(date, "%Y-%m-%d").timestamp()
+    filters = {
+        "type": measurement_type,
+        "status": STOPPED,
+        "start_time__gte": timestamp,
+        "start_time__lt": timestamp + 24 * 60 * 60,
+        "fields": "id,start_time,stop_time,af,query_argument,query_type,result",
+    }
+    url_path = "/api/v2/measurements/"
+    is_success, response = AtlasRequest(**{"url_path": url_path}).get(
+        **filters
+    )
+    if is_success:
+        return response["results"]
+    else:
         return None
 
 
