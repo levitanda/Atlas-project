@@ -255,12 +255,6 @@ result2 = {
 
 
 def dns_data(request, first_date, second_date):
-    # return JsonResponse(
-    #     {
-    #         "result1": result,
-    #         "result2": result2,
-    #     }
-    # )
     if first_date == second_date:
         dns_result = check_dns_measurements(first_date)
         return JsonResponse(
@@ -270,6 +264,13 @@ def dns_data(request, first_date, second_date):
             }
         )
     else:
+        # ! for demo purposes only
+        return JsonResponse(
+            {
+                "result1": result,
+                "result2": result2,
+            }
+        )
         return JsonResponse(
             {
                 "result1": check_dns_measurements(first_date),

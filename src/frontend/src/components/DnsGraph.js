@@ -14,9 +14,7 @@ import { geojson } from "./geo_data.js";
 import { Container, Row, Form, Button, Col, ButtonGroup } from 'react-bootstrap';
 import { scaleLinear } from "d3-scale";
 
-function getRandomFloat(min, max) {
-    return Math.random() * (max - min) + min;
-}
+
 const DateTimeForm = ({ updateDatesFunction, chosenDates }) => {
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -164,12 +162,12 @@ const MapChart = memo(({ setTooltipContent }) => {
                     </ZoomableGroup>
                 </ComposableMap>
             </Row>
-            {!isLoading ? (<Row>
+            {!isLoading ? (<Row className="mb-3">
                 <Col>
                     <DateTimeForm updateDatesFunction={setDates} chosenDates={dates} />
                 </Col>
             </Row>) : "Loading"}
-            {!isLoading ? (<Row>
+            {!isLoading ? (<Row >
                 <Col>
                     <ButtonGroup>
                         <Button
