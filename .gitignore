@@ -3,6 +3,10 @@ myworld/
 # virtural environments
 src/frontend/build/
 src/frontend/node_modules/
+src/Backend/requirements.txt
 # node modules
 *pyc*
 
+src/Backend/requirements.txt
+
+.vscode/
