@@ -3,6 +3,7 @@ import Tab from 'react-bootstrap/Tab';
 import Stack from 'react-bootstrap/Stack';
 import Tabs from 'react-bootstrap/Tabs';
 import Graph from "./DnsGraph";
+import IpV6component from './IpV6component';
 
 function ControlledTabsExample() {
     const [key, setKey] = useState('DNS');
@@ -19,9 +20,7 @@ function ControlledTabsExample() {
             </Tab>
             <Tab eventKey="IPv6" title="IPv6 deployment">
                 <Stack gap={3}>
-                    <div className="bg-warning border">First item</div>
-                    <div className="bg-warning border">Second item</div>
-                    <div className="bg-warning border">Third item</div>
+                    <IpV6component />
                 </Stack>
             </Tab>
         </Tabs>
