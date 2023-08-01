@@ -1,66 +1,55 @@
 import React, { useState, useMemo, useEffect } from 'react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Container, Row, Form, Button, Col, ButtonGroup } from 'react-bootstrap';
-import Select from 'react-select'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { Container, Row, Form, Button, Col } from 'react-bootstrap';
 import countryList from 'react-select-country-list'
-import axios from 'axios';
 
 
-function CountrySelector({ onChange }) {
-  // change function signature , it need to accept update handler of parent
-  const [value, setValue] = useState('')
-  const options = useMemo(() => countryList().getData(), [])
 
-  const changeHandler = value => {
-    setValue(value)
-    onChange(value)
-    //call passed handler with value
-  }
-  return <Select options={options} value={value} onChange={changeHandler} />
-}
-const DateTimeForm = ({ updateDatesFunction, chosenDates, updateSelectedCountry, choosenCountry }) => {
+const DateTimeCountryForm = ({
+  updateData,
+  initialData
+}) => {
   const handleSubmit = event => {
     event.preventDefault();
-    updateDatesFunction({ "date1": event.target.date1.value, "date2": event.target.date2.value });
-    //How to use choosen country?
-    //updateSelectedCountry(choosenCountry);
-    //console.log(choosenCountry);
+    updateData({
+      "date1": event.target.date1.value,
+      "date2": event.target.date2.value,
+      "country": event.target.country.value,
+    })
   };
 
-  const handleCountryChange = (value) => {
-    updateSelectedCountry(value);
-  };
-  //define new state variable using useState
-
-
-  // useEffect and call for server
-  //console.log(choosenCountry)
+  const country_options = useMemo(() => countryList().getData(), [])
   return (
     <Form onSubmit={handleSubmit}>
-      <Row className="align-items-end">
-        <Col md={4}>
+      <Row className="d-flex justify-content-center align-items-end">
+        <Col md={3}>
           <Form.Group controlId="date1">
             <Form.Label>Reference Date</Form.Label>
             <Form.Control type="date"
-              defaultValue={chosenDates["date1"]}
+              defaultValue={initialData["date1"]}
             />
           </Form.Group>
         </Col>
-        <Col md={4}>
+        <Col md={3}>
           <Form.Group controlId="date2">
             <Form.Label>Compare Date</Form.Label>
-            <Form.Control type="date" defaultValue={chosenDates["date2"]} />
+            <Form.Control type="date"
+              defaultValue={initialData["date2"]}
+            />
           </Form.Group>
         </Col>
-        <Col md={4}>
+        <Col md={3}>
+
           <Form.Group controlId="country">
             <Form.Label>Country</Form.Label>
-            <CountrySelector onChange={handleCountryChange} />
+            <Form.Select defaultValue={initialData["country"]}>
+              {country_options.map((country) => (
+                <option key={country.value} value={country.value}>{country.label}</option>)
+              )}
+            </Form.Select>
           </Form.Group>
         </Col>
-      </Row>
-      <Row>
-        <Col md={4} className="d-flex align-items-end justify-content-center">
+        <Col md={1} className="d-flex align-items-end justify-content-center">
           <Button variant="primary" type="submit">
             Submit
           </Button>
@@ -101,36 +90,46 @@ const AreaChart = () => {
       "ipv6": 37,
     }
   ])
-  const get_current_date = () => new Date().toISOString().split("T")[0]
-  const [dates, setDates] = useState({ "date1": get_current_date(), "date2": get_current_date() });
-  const [selectedCountry, setSelectedCountry] = useState('');
+
+
+  const initialDataState = () => {
+    const get_current_date = () => new Date().toISOString().split("T")[0]
+    const get_one_month_ago_from_today_date = () => {
+      let date = new Date();
+      date.setMonth(date.getMonth() - 1);
+      return date.toISOString().split("T")[0]
+    }
+    return {
+      "date1": get_one_month_ago_from_today_date(),
+      "date2": get_current_date(),
+      "country": "IL"
+    }
+  };
+  const [dates_country_data, updateData] = useState(initialDataState());
+
+
   const [isLoading, setIsLoading] = useState(false);
 
-  const [choosenResult, setSelectedButton] = useState("result1");
-  const handleButtonClick = (button) => {
-    setSelectedButton(button);
-  };
 
-  console.log(dates)
-  console.log(selectedCountry)
+
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const country_code = selectedCountry.value.substring(0, 2)
+        const country_code = dates_country_data["country"]
+        const first_date = dates_country_data["date1"]
+        const second_date = dates_country_data["date2"]
         setIsLoading(true);
-        console.log(country_code);
-        const response = await fetch(`/ipv/country=${country_code}&first_date=${dates["date1"]}&second_date=${dates["date2"]}`);
+        const response = await fetch(`/ipv/country=${country_code}&first_date=${first_date}&second_date=${second_date}`);
         const jsonData = await response.json();
         setData(jsonData.data);
-        console.log(jsonData);
         setIsLoading(false);
       } catch (error) {
         console.log(error.message)
       }
     };
     fetchData();
-  }, [dates, selectedCountry])
+  }, [dates_country_data])
   return (
     <Container id="chart" >
       <br></br>
@@ -161,7 +160,9 @@ const AreaChart = () => {
       </Row>) : "Loading"}
       <Row className="mb-3">
         <Col>
-          <DateTimeForm updateDatesFunction={setDates} chosenDates={dates} updateSelectedCountry={setSelectedCountry} choosenCountry={selectedCountry} />
+          <DateTimeCountryForm
+            updateData={updateData}
+            initialData={initialDataState()} />
         </Col>
       </Row>
     </Container>
