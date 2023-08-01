@@ -6,7 +6,7 @@ import Graph from "./DnsGraph";
 import IpV6component from './IpV6component';
 
 function ControlledTabsExample() {
-    const [key, setKey] = useState('DNS');
+    const [key, setKey] = useState('IPv6');
 
     return (
         <Tabs
