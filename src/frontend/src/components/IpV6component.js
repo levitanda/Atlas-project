@@ -61,29 +61,32 @@ const DateTimeCountryForm = ({ updateData, initialData }) => {
 };
 
 const AreaChartGraph = ({ data }) => {
-  return <LineChart
-    width={1000}
-    height={450}
-        data={data}
-    margin={{
-      top: 5,
-      right: 30,
-      left: 20,
-      bottom: 5
-    }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis domain={[0, 100]} />
-        <Tooltip />
-        <Legend />
-        <Line
-          type="monotone"
-          dataKey="ipv6"
-          stroke="#8884d8"
-      activeDot={{ r: 8 }} />
-  </LineChart>;
-}
+  return (
+    <LineChart
+      width={1000}
+      height={450}
+      data={data}
+      // margin={{
+      //   top: 5,
+      //   right: 30,
+      //   left: 20,
+      //   bottom: 5,
+      // }}
+    >
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey="name" />
+      <YAxis domain={[0, 100]} />
+      <Tooltip />
+      <Legend />
+      <Line
+        type="monotone"
+        dataKey="ipv6"
+        stroke="#8884d8"
+        activeDot={{ r: 8 }}
+      />
+    </LineChart>
+  );
+};
 
 const AreaChart = () => {
   const [data, setData] = useState([]);
@@ -124,8 +127,12 @@ const AreaChart = () => {
     fetchData();
   }, [dates_country_data]);
   return (
-    <React.Fragment>
-      <Row>{!isLoading ? <AreaChartGraph data={data} /> : "Loading"}</Row>
+    <Col>
+      <Row className="mb-3">
+        <Col md={12}>
+          {!isLoading ? <AreaChartGraph data={data} /> : "Loading"}
+        </Col>
+      </Row>
       <Row className="mb-3">
         <Col>
           <DateTimeCountryForm
@@ -134,16 +141,12 @@ const AreaChart = () => {
           />
         </Col>
       </Row>
-    </React.Fragment>
+    </Col>
   );
 };
 
 const IpV6component = () => {
-  return (
-    <div>
-      <AreaChart />
-    </div>
-  );
+  return <AreaChart />;
 };
 
 export default IpV6component;
