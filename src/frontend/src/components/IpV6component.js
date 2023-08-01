@@ -9,7 +9,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { Container, Row, Form, Button, Col } from "react-bootstrap";
+import { Container, Row, Form, Button, Col, Spinner } from "react-bootstrap";
 import countryList from "react-select-country-list";
 
 const DateTimeCountryForm = ({ updateData, initialData }) => {
@@ -25,7 +25,7 @@ const DateTimeCountryForm = ({ updateData, initialData }) => {
     date2.setHours(0, 0, 0, 0);
 
     if (date1 > today || date2 > today) {
-      alert('Selected dates cannot be in the future!');
+      alert("Selected dates cannot be in the future!");
       return;
     }
 
@@ -65,7 +65,7 @@ const DateTimeCountryForm = ({ updateData, initialData }) => {
               </Form.Select>
             </Form.Group>
           </Col>
-          <Col md={1} className="d-flex align-items-end justify-content-center" >
+          <Col md={1} className="d-flex align-items-end justify-content-center">
             <Button variant="primary" type="submit">
               Submit
             </Button>
@@ -78,15 +78,11 @@ const DateTimeCountryForm = ({ updateData, initialData }) => {
 
 const AreaChartGraph = ({ data }) => {
   return (
-    <ResponsiveContainer width="100%" >
+    <ResponsiveContainer width="100%">
       <LineChart
-        // width={1000}
-        // height={450}
         data={data}
         margin={{
           top: 10,
-          // right: 30,
-          // left: 20,
           bottom: 10,
         }}
       >
@@ -137,6 +133,7 @@ const AreaChart = () => {
         );
         const jsonData = await response.json();
         setData(jsonData.data);
+        // setData([]);
         setIsLoading(false);
       } catch (error) {
         console.log(error.message);
@@ -144,24 +141,39 @@ const AreaChart = () => {
     };
     fetchData();
   }, [dates_country_data]);
+
+  const render_conent = () => {
+    if (!isLoading) {
+      if (data.length > 0) {
+        return (
+          <Col
+            md={12}
+            style={{
+              marginTop: "10px",
+              height: "75vh",
+              border: "1px solid black",
+              borderRadius: "10px",
+            }}
+          >
+            <AreaChartGraph data={data} />
+          </Col>
+        );
+      } else {
+        // case where there is no data
+        return <Col>no data found at server</Col>;
+      }
+    } else if (isLoading) {
+      return <LoadingSpinner />;
+    }
+  };
   return (
     <Container>
-      <Row className="justify-content-md=center">
-        <Col md={12} style={{
-                    marginTop: '10px',
-                    height: '75vh',
-                    border: '1px solid black',
-                    borderRadius: '10px'
-                }}>
-          {!isLoading ? <AreaChartGraph data={data} /> : "Loading"}
-        </Col>
-      </Row>
+      <Row className="justify-content-md=center">{render_conent()}</Row>
       <Row>
-        <Col md={12} >
+        <Col md={12}>
           <DateTimeCountryForm
             updateData={updateData}
             initialData={computeInitialData()}
-            
           />
         </Col>
       </Row>
@@ -169,6 +181,18 @@ const AreaChart = () => {
   );
 };
 
+function LoadingSpinner() {
+  return (
+    <div
+      className="d-flex justify-content-center align-items-center"
+      style={{ height: "75vh" }}
+    >
+      <Spinner animation="border" role="status">
+        <span className="visually-hidden">Loading...</span>
+      </Spinner>
+    </div>
+  );
+}
 const IpV6component = () => {
   return <AreaChart />;
 };
