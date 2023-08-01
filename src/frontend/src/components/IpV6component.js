@@ -59,40 +59,36 @@ const DateTimeCountryForm = ({
   );
 };
 
+const AreaChartGraph = ({ data }) => {
+  return <LineChart
+    width={1000}
+    height={450}
+    data={data}
+    margin={{
+      top: 5,
+      right: 30,
+      left: 20,
+      bottom: 5
+    }}
+  >
+    <CartesianGrid strokeDasharray="3 3" />
+    <XAxis dataKey="name" />
+    <YAxis domain={[0, 100]} />
+    <Tooltip />
+    <Legend />
+    <Line
+      type="monotone"
+      dataKey="ipv6"
+      stroke="#8884d8"
+      activeDot={{ r: 8 }} />
+  </LineChart>;
+}
+
 const AreaChart = () => {
   const [data, setData] = useState([
-    {
-      "name": "01/05/2023",
-      "ipv6": 33.5,
-    },
-    {
-      "name": "02/05/2023",
-      "ipv6": 33.5,
-    },
-    {
-      "name": "03/05/2023",
-      "ipv6": 33.8,
-    },
-    {
-      "name": "04/05/2023",
-      "ipv6": 35,
-    },
-    {
-      "name": "05/05/2023",
-      "ipv6": 35.5,
-    },
-    {
-      "name": "06/05/2023",
-      "ipv6": 36,
-    },
-    {
-      "name": "07/05/2023",
-      "ipv6": 37,
-    }
   ])
 
-
-  const initialDataState = () => {
+  const computeInitialData = () => {
     const get_current_date = () => new Date().toISOString().split("T")[0]
     const get_one_month_ago_from_today_date = () => {
       let date = new Date();
@@ -105,9 +101,7 @@ const AreaChart = () => {
       "country": "IL"
     }
   };
-  const [dates_country_data, updateData] = useState(initialDataState());
-
-
+  const [dates_country_data, updateData] = useState(computeInitialData());
   const [isLoading, setIsLoading] = useState(false);
 
 
@@ -134,39 +128,19 @@ const AreaChart = () => {
     <Container id="chart" >
       <br></br>
       {!isLoading ? (<Row>
-        <LineChart
-          width={1000}
-          height={450}
-          data={data}
-          margin={{
-            top: 5,
-            right: 30,
-            left: 20,
-            bottom: 5
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis domain={[0, 100]} />
-          <Tooltip />
-          <Legend />
-          <Line
-            type="monotone"
-            dataKey="ipv6"
-            stroke="#8884d8"
-            activeDot={{ r: 8 }}
-          />
-        </LineChart>
+        <AreaChartGraph data={data} />
       </Row>) : "Loading"}
       <Row className="mb-3">
         <Col>
           <DateTimeCountryForm
             updateData={updateData}
-            initialData={initialDataState()} />
+            initialData={computeInitialData()} />
         </Col>
       </Row>
     </Container>
   );
+
+
 }
 
 const IpV6component = () => {
