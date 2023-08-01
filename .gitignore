@@ -10,3 +10,4 @@ src/Backend/requirements.txt
 src/Backend/requirements.txt
 
 .vscode/
+src/frontend/package-lock.json

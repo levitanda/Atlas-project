@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Dict, Union
 from ripe.atlas.cousteau import AtlasRequest
 from ripe.atlas.sagan import Result, DnsResult
@@ -244,3 +244,86 @@ def check_dns_measurements(date):
         results = merge_measurement_results(measurement_hash, results)
     grouped_result = compute_average_by_country(results)
     return prepare_results_for_frontend(grouped_result)
+
+
+# IPv6 functions
+
+
+def probes_ipv6_check(probe, start_date, finish_date):
+    filters = {
+        "probe": probe,
+        "date__gte": start_date,
+        "date__lte": finish_date,
+    }
+    url_path = "/api/v2/probes/archive"
+    is_success, response = AtlasRequest(**{"url_path": url_path}).get(
+        **filters
+    )
+    if is_success:
+        return [
+            {
+                "id": result["id"],
+                "asn_v6": result["asn_v6"],
+                "asn_v4": result["asn_v4"],
+                "date": result["date"],
+            }
+            for result in response["results"]
+        ]
+    else:
+        return None
+
+
+def get_probes_for_country(country_code):
+    filters = {"country_code": country_code}
+    url_path = "/api/v2/probes/"
+    is_success, response = AtlasRequest(**{"url_path": url_path}).get(
+        **filters
+    )
+    if is_success:
+        return response["results"]
+    else:
+        return None
+
+
+def add_results_ipv6(data, day, percentage):
+    if percentage!=0:
+        data.append({"name": day, "ipv6": percentage})
+    else:
+        print()
+    return data
+
+
+def check_as_for_probes(country_code, start_date, finish_date):
+    probes = get_probes_for_country(country_code)
+    start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
+    end_datetime = datetime.strptime(finish_date, "%Y-%m-%d")
+    delta = end_datetime - start_datetime
+    ids = [item["id"] for item in probes]
+    results = probes_ipv6_check(ids, start_date, finish_date)
+    data = []
+    for i in range(delta.days + 1):
+        current_date = start_datetime + timedelta(days=i)
+        # date_obj = datetime.strptime(current_date, "%Y%m%d")
+        current_day = current_date.strftime("%Y%m%d")
+        as_version_6 = set()
+        as_version_4 = set()
+        for res in results:
+            if res["date"] == current_day:
+                if res["asn_v6"] == None:
+                    as_version_4.add(res["asn_v4"])
+                else:
+                    as_version_6.add(res["asn_v6"])
+        amount_as_ipv6 = len(as_version_6)
+        amount_as_ipv4 = len(as_version_4)
+        # print(amount_as_ipv4, "ipv4")
+        # print(amount_as_ipv6, "ipv6")
+        percentage = (
+            (amount_as_ipv6 / (amount_as_ipv6 + amount_as_ipv4)) * 100
+            if amount_as_ipv6 + amount_as_ipv4 != 0
+            else 0
+        )
+        # ! TODO fix default value 
+        # print(f"At date {current_day} the percentage of IPv6 ASes in {country_code} is: {percentage}%")
+        current_day = current_date.strftime("%Y-%m-%d")
+        data = add_results_ipv6(data, current_day, percentage)
+    return data

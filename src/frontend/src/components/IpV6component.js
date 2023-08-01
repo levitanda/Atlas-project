@@ -1,25 +1,40 @@
-import React, {useState} from 'react'
+import React, {useState, useMemo, useEffect} from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Container, Row, Form, Button, Col, ButtonGroup } from 'react-bootstrap';
-//import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
-//import { getCountries } from 'react-intl-countries';
-//import { countries } from 'countries-list';
+import Select from 'react-select'
+import countryList from 'react-select-country-list'
+import axios from 'axios';
 
-const DateTimeForm = ({ updateDatesFunction, chosenDates }) => {
-  const handleSubmit = (event) => {
+
+function CountrySelector({onChange}) {
+  // change function signature , it need to accept update handler of parent
+  const [value, setValue] = useState('')
+  const options = useMemo(() => countryList().getData(), [])
+
+  const changeHandler = value => {
+    setValue(value)
+    onChange(value)
+  //call passed handler with value
+  }
+  return <Select options={options} value={value} onChange={changeHandler} />
+}
+const DateTimeForm = ({ updateDatesFunction, chosenDates, updateSelectedCountry, choosenCountry }) => {
+  const handleSubmit = event => {
       event.preventDefault();
-      updateDatesFunction({ "date1": event.target.date1.value, "date2": event.target.date2.value });
+      updateDatesFunction({ "date1": event.target.date1.value, "date2": event.target.date2.value});
+      //How to use choosen country?
+      //updateSelectedCountry(choosenCountry);
+      //console.log(choosenCountry);
   };
- /* const countries = getCountries('en'); // Get the list of countries in English
-  const countryOptions = Object.entries(countries).map(([code, name]) => ({
-    value: code,
-    label: name,
-  }));*/
+
+  const handleCountryChange = (value) => {
+    updateSelectedCountry(value);
+  };
+  //define new state variable using useState
   
-  /*const countryOptions = Object.entries(countries).map(([code, name]) => ({
-    value: code,
-    label: name,
-  }));*/
+  
+  // useEffect and call for server
+  //console.log(choosenCountry)
   return (
       <Form onSubmit={handleSubmit}>
           <Row className="align-items-end">
@@ -40,18 +55,11 @@ const DateTimeForm = ({ updateDatesFunction, chosenDates }) => {
               <Col md={4}>
                 <Form.Group controlId="country">
                   <Form.Label>Country</Form.Label>
-                  <Form.Control as="select">
-                    {countryOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </Form.Control>
+                    <CountrySelector onChange={handleCountryChange}/>
                 </Form.Group>
               </Col>
           </Row>
           <Row>
-              <Col></Col>
               <Col md={4} className="d-flex align-items-end justify-content-center">
                   <Button variant="primary" type="submit">
                       Submit
@@ -63,61 +71,73 @@ const DateTimeForm = ({ updateDatesFunction, chosenDates }) => {
 };
 
 const AreaChart = () => {
-  const data = [
+  const [data, setData] = useState([
     {
       "name": "01/05/2023",
       "ipv6": 33.5,
-      //"amt": 2400
     },
     {
       "name": "02/05/2023",
       "ipv6": 33.5,
-      //"amt": 2210
     },
     {
       "name": "03/05/2023",
       "ipv6": 33.8,
-      //"amt": 2290
     },
     {
       "name": "04/05/2023",
       "ipv6": 35,
-      //"amt": 2000
     },
     {
       "name": "05/05/2023",
       "ipv6": 35.5,
-      //"amt": 2181
     },
     {
       "name": "06/05/2023",
       "ipv6": 36,
-      //"amt": 2500
     },
     {
       "name": "07/05/2023",
       "ipv6": 37,
-      //"amt": 2100
     }
-  ]
+  ])
   const get_current_date = () => new Date().toISOString().split("T")[0]
   const [dates, setDates] = useState({ "date1": get_current_date(), "date2": get_current_date() });
-  const [isLoading, setIsLoading] = useState(true);
+  const [selectedCountry, setSelectedCountry] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  
   const [choosenResult, setSelectedButton] = useState("result1");
   const handleButtonClick = (button) => {
     setSelectedButton(button);
   };
+
+  console.log(dates)
+  console.log(selectedCountry)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+          const country_code = selectedCountry.value.substring(0, 2)
+          setIsLoading(true);
+          console.log(country_code);
+          const response = await fetch(`/ipv/country=${country_code}&first_date=${dates["date1"]}&second_date=${dates["date2"]}`);
+          const jsonData = await response.json();
+          setData(jsonData.data);
+          console.log(jsonData);
+          setIsLoading(false);
+      } catch (error) {
+          console.log(error.message)
+      }
+  };
+  fetchData();
+  }, [dates, selectedCountry])
   return (
       <Container id="chart" >
-        <Row>
-          <LineChart style={{
-              width: '100%',
-              height: '60vh',
-              border: '1px solid black',
-              borderRadius: '10px'
-            }} 
-            width={500}
-            height={300}
+        <br></br>
+        {!isLoading ? (<Row>
+          <LineChart
+            width={1000}
+            height={450}
             data={data}
             margin={{
               top: 5,
@@ -136,32 +156,14 @@ const AreaChart = () => {
               dataKey="ipv6"
               stroke="#8884d8"
               activeDot={{ r: 8 }}
-            />
+            /> 
           </LineChart>
-        </Row>
+        </Row>) : "Loading"}
         <Row className="mb-3">
                 <Col>
-                    <DateTimeForm updateDatesFunction={setDates} chosenDates={dates} />
+                    <DateTimeForm updateDatesFunction={setDates} chosenDates={dates} updateSelectedCountry={setSelectedCountry} choosenCountry={selectedCountry}/>
                 </Col>
             </Row>
-            {!isLoading ? (<Row >
-                <Col>
-                    <ButtonGroup>
-                        <Button
-                            variant={choosenResult === 'result1' ? 'primary' : 'secondary'}
-                            onClick={() => handleButtonClick('result1')}
-                        >
-                            Show Result of First Date
-                        </Button>
-                        <Button
-                            variant={choosenResult === 'result2' ? 'primary' : 'secondary'}
-                            onClick={() => handleButtonClick('result2')}
-                        >
-                            Show Result of Second Date
-                        </Button>
-                    </ButtonGroup>
-                </Col>
-            </Row>) : ""}
       </Container>
       );
 }
