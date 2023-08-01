@@ -97,7 +97,7 @@ const MapChart = memo(({ setTooltipContent }) => {
 
             <Row>
                 <ComposableMap style={{
-                    width: '100%',
+                    marginTop: '10px',
                     height: '75vh',
                     border: '1px solid black',
                     borderRadius: '10px'
