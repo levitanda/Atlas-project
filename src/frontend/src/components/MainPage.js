@@ -2,7 +2,7 @@ import { useState } from "react";
 import Tab from "react-bootstrap/Tab";
 import Stack from "react-bootstrap/Stack";
 import Tabs from "react-bootstrap/Tabs";
-import Graph from "./DnsGraph";
+import DnsGraphComponent from "./DnsGraph";
 import IpV6component from "./IpV6component";
 
 function ControlledTabsExample() {
@@ -16,7 +16,7 @@ function ControlledTabsExample() {
       // className="mb-3"
     >
       <Tab eventKey="DNS" title="DNS availability">
-        <Graph />
+        <DnsGraphComponent />
       </Tab>
       <Tab eventKey="IPv6" title="IPv6 deployment">
         <IpV6component />
