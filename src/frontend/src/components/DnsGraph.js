@@ -21,7 +21,7 @@ import {
 } from "react-bootstrap";
 import { scaleLinear } from "d3-scale";
 
-const DateTimeForm = ({ updateDatesFunction, chosenDates }) => {
+const DateTimeForm = ({ updateDatesFunction, initialData }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     updateDatesFunction({
@@ -36,13 +36,13 @@ const DateTimeForm = ({ updateDatesFunction, chosenDates }) => {
         <Col md={3}>
           <Form.Group controlId="date1">
             <Form.Label>Reference Date</Form.Label>
-            <Form.Control type="date" defaultValue={chosenDates["date1"]} />
+            <Form.Control type="date" defaultValue={initialData["date1"]} />
           </Form.Group>
         </Col>
         <Col md={3}>
           <Form.Group controlId="date2">
             <Form.Label>Compare Date</Form.Label>
-            <Form.Control type="date" defaultValue={chosenDates["date2"]} />
+            <Form.Control type="date" defaultValue={initialData["date2"]} />
           </Form.Group>
         </Col>
         <Col md={1}>
@@ -54,6 +54,7 @@ const DateTimeForm = ({ updateDatesFunction, chosenDates }) => {
     </Form>
   );
 };
+
 const MapChart = memo(({ setTooltipContent }) => {
   const defaultResult = {
     data: {},
@@ -181,7 +182,7 @@ const MapChart = memo(({ setTooltipContent }) => {
       {!isLoading ? (
         <Row className="mb-3">
           <Col>
-            <DateTimeForm updateDatesFunction={setDates} chosenDates={dates} />
+            <DateTimeForm updateDatesFunction={setDates} initialData={dates} />
           </Col>
         </Row>
       ) : (
