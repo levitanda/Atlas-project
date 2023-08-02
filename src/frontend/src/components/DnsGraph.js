@@ -98,7 +98,7 @@ const DnsGraphController = memo(({ setTooltipContent }) => {
 
   return (
     <Container id="map">
-      <Row>
+      <Row className="mb-3">
         <DnsCountryGraph
           data={data}
           setTooltipContent={setTooltipContent}
@@ -106,7 +106,7 @@ const DnsGraphController = memo(({ setTooltipContent }) => {
         />
       </Row>
       {!isLoading ? (
-        <Row>
+        <Row className="mb-3">
           <DateTimeForm updateDatesFunction={setDates} initialData={dates} />
         </Row>
       ) : (
