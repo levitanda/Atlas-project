@@ -95,89 +95,15 @@ const MapChart = memo(({ setTooltipContent }) => {
     setSelectedButton(button);
   };
   const choosenData = data[`${choosenResult}`];
-  const colorScale = scaleLinear()
-    .domain([choosenData["min"], choosenData["average"], choosenData["max"]])
-    .range(["green", "yellow", "red"]);
+
   return (
     <Container id="map">
       <Row>
-        <ComposableMap
-          style={{
-            marginTop: "10px",
-            height: "75vh",
-            border: "1px solid black",
-            borderRadius: "10px",
-          }}
-        >
-          <PatternLines
-            id="lines"
-            height={6}
-            width={6}
-            stroke="#776865"
-            strokeWidth={1}
-            background="#F6F0E9"
-            orientation={["diagonal"]}
-          />
-          <ZoomableGroup>
-            <PatternLines
-              id="lines"
-              height={6}
-              width={6}
-              stroke="#776865"
-              strokeWidth={1}
-              background="#F6F0E9"
-              orientation={["diagonal"]}
-            />
-            <Sphere stroke="#E4E5E6" strokeWidth={0.5} />
-            <Graticule stroke="#E4E5E6" strokeWidth={0.5} />
-            <Geographies geography={geojson}>
-              {({ geographies }) =>
-                geographies.map((geo) => (
-                  <Geography
-                    key={geo.rsmKey}
-                    geography={geo}
-                    onMouseEnter={() => {
-                      const name = geo.properties.name;
-                      const reference_result =
-                        data["result1"]["data"][`${geo.id}`] || "NA";
-                      const ref_string = `ref: \n${reference_result}${
-                        reference_result === "NA" ? "" : "ms"
-                      }`;
-                      const compare_result =
-                        data["result2"]["data"][`${geo.id}`] || "NA";
-                      const cmp_string = `cmp: \n${compare_result}${
-                        compare_result === "NA" ? "" : "ms"
-                      }`;
-                      setTooltipContent(
-                        `${name}: \n${ref_string}\n${cmp_string}`
-                      );
-                    }}
-                    onMouseLeave={() => {
-                      setTooltipContent("");
-                    }}
-                    stroke="#81a7e3"
-                    style={{
-                      default: {
-                        fill: choosenData["data"][`${geo.id}`]
-                          ? colorScale(choosenData["data"][`${geo.id}`])
-                          : "url('#lines')",
-                        outline: "none",
-                      },
-                      hover: {
-                        fill: "#81a7e3",
-                        outline: "none",
-                      },
-                      pressed: {
-                        fill: "#E42",
-                        outline: "none",
-                      },
-                    }}
-                  />
-                ))
-              }
-            </Geographies>
-          </ZoomableGroup>
-        </ComposableMap>
+        <DnsCountryGraph
+          data={data}
+          setTooltipContent={setTooltipContent}
+          choosenData={choosenData}
+        />
       </Row>
       {!isLoading ? (
         <Row className="mb-3">
@@ -213,6 +139,89 @@ const MapChart = memo(({ setTooltipContent }) => {
     </Container>
   );
 });
+
+function DnsCountryGraph({data, setTooltipContent, choosenData}) {
+  const colorScale = scaleLinear()
+    .domain([choosenData["min"], choosenData["average"], choosenData["max"]])
+    .range(["green", "yellow", "red"]);
+  return (
+    <ComposableMap
+      style={{
+        marginTop: "10px",
+        height: "75vh",
+        border: "1px solid black",
+        borderRadius: "10px",
+      }}
+    >
+      <PatternLines
+        id="lines"
+        height={6}
+        width={6}
+        stroke="#776865"
+        strokeWidth={1}
+        background="#F6F0E9"
+        orientation={["diagonal"]}
+      />
+      <ZoomableGroup>
+        <PatternLines
+          id="lines"
+          height={6}
+          width={6}
+          stroke="#776865"
+          strokeWidth={1}
+          background="#F6F0E9"
+          orientation={["diagonal"]}
+        />
+        <Sphere stroke="#E4E5E6" strokeWidth={0.5} />
+        <Graticule stroke="#E4E5E6" strokeWidth={0.5} />
+        <Geographies geography={geojson}>
+          {({ geographies }) =>
+            geographies.map((geo) => (
+              <Geography
+                key={geo.rsmKey}
+                geography={geo}
+                onMouseEnter={() => {
+                  const name = geo.properties.name;
+                  const reference_result =
+                    data["result1"]["data"][`${geo.id}`] || "NA";
+                  const ref_string = `ref: \n${reference_result}${
+                    reference_result === "NA" ? "" : "ms"
+                  }`;
+                  const compare_result =
+                    data["result2"]["data"][`${geo.id}`] || "NA";
+                  const cmp_string = `cmp: \n${compare_result}${
+                    compare_result === "NA" ? "" : "ms"
+                  }`;
+                  setTooltipContent(`${name}: \n${ref_string}\n${cmp_string}`);
+                }}
+                onMouseLeave={() => {
+                  setTooltipContent("");
+                }}
+                stroke="#81a7e3"
+                style={{
+                  default: {
+                    fill: choosenData["data"][`${geo.id}`]
+                      ? colorScale(choosenData["data"][`${geo.id}`])
+                      : "url('#lines')",
+                    outline: "none",
+                  },
+                  hover: {
+                    fill: "#81a7e3",
+                    outline: "none",
+                  },
+                  pressed: {
+                    fill: "#E42",
+                    outline: "none",
+                  },
+                }}
+              />
+            ))
+          }
+        </Geographies>
+      </ZoomableGroup>
+    </ComposableMap>
+  );
+}
 
 function DnsGraphComponent() {
   const [content, setContent] = useState("");
