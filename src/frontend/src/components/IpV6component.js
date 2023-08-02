@@ -76,7 +76,7 @@ const DateTimeCountryForm = ({ updateData, initialData }) => {
   );
 };
 
-const AreaChartGraph = ({ data }) => {
+const LineIPv6Graph = ({ data }) => {
   return (
     <ResponsiveContainer width="100%">
       <LineChart
@@ -102,7 +102,7 @@ const AreaChartGraph = ({ data }) => {
   );
 };
 
-const AreaChart = () => {
+const IpV6Controller = () => {
   const [data, setData] = useState([]);
 
   const computeInitialData = () => {
@@ -155,7 +155,7 @@ const AreaChart = () => {
               borderRadius: "10px",
             }}
           >
-            <AreaChartGraph data={data} />
+            <LineIPv6Graph data={data} />
           </Col>
         );
       } else {
@@ -194,7 +194,7 @@ function LoadingSpinner() {
   );
 }
 const IpV6component = () => {
-  return <AreaChart />;
+  return <IpV6Controller />;
 };
 
 export default IpV6component;
