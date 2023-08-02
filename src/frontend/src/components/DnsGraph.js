@@ -55,7 +55,7 @@ const DateTimeForm = ({ updateDatesFunction, initialData }) => {
   );
 };
 
-const MapChart = memo(({ setTooltipContent }) => {
+const DnsGraphController = memo(({ setTooltipContent }) => {
   const defaultResult = {
     data: {},
     average: 0,
@@ -106,10 +106,8 @@ const MapChart = memo(({ setTooltipContent }) => {
         />
       </Row>
       {!isLoading ? (
-        <Row className="mb-3">
-          <Col>
-            <DateTimeForm updateDatesFunction={setDates} initialData={dates} />
-          </Col>
+        <Row>
+          <DateTimeForm updateDatesFunction={setDates} initialData={dates} />
         </Row>
       ) : (
         "Loading"
@@ -117,20 +115,10 @@ const MapChart = memo(({ setTooltipContent }) => {
       {!isLoading ? (
         <Row>
           <Col>
-            <ButtonGroup>
-              <Button
-                variant={choosenResult === "result1" ? "primary" : "secondary"}
-                onClick={() => handleButtonClick("result1")}
-              >
-                Show Result of First Date
-              </Button>
-              <Button
-                variant={choosenResult === "result2" ? "primary" : "secondary"}
-                onClick={() => handleButtonClick("result2")}
-              >
-                Show Result of Second Date
-              </Button>
-            </ButtonGroup>
+            <ColorByDateChooser
+              choosenResult={choosenResult}
+              handleButtonClick={handleButtonClick}
+            />
           </Col>
         </Row>
       ) : (
@@ -140,7 +128,26 @@ const MapChart = memo(({ setTooltipContent }) => {
   );
 });
 
-function DnsCountryGraph({data, setTooltipContent, choosenData}) {
+const ColorByDateChooser = ({ choosenResult, handleButtonClick }) => {
+  return (
+    <ButtonGroup>
+      <Button
+        variant={choosenResult === "result1" ? "primary" : "secondary"}
+        onClick={() => handleButtonClick("result1")}
+      >
+        Show Result of First Date
+      </Button>
+      <Button
+        variant={choosenResult === "result2" ? "primary" : "secondary"}
+        onClick={() => handleButtonClick("result2")}
+      >
+        Show Result of Second Date
+      </Button>
+    </ButtonGroup>
+  );
+};
+
+function DnsCountryGraph({ data, setTooltipContent, choosenData }) {
   const colorScale = scaleLinear()
     .domain([choosenData["min"], choosenData["average"], choosenData["max"]])
     .range(["green", "yellow", "red"]);
@@ -227,7 +234,7 @@ function DnsGraphComponent() {
   const [content, setContent] = useState("");
   return (
     <React.Fragment>
-      <MapChart setTooltipContent={setContent} />
+      <DnsGraphController setTooltipContent={setContent} />
       <Tooltip anchorSelect="#map" content={content} float />
     </React.Fragment>
   );
