@@ -12,6 +12,14 @@ import {
 import { Container, Row, Form, Button, Col, Spinner } from "react-bootstrap";
 import countryList from "react-select-country-list";
 
+export const get_current_date = () => new Date().toISOString().split("T")[0];
+export const get_one_month_ago_from_today_date = () => {
+  let date = new Date();
+  date.setMonth(date.getMonth() - 1);
+  return date.toISOString().split("T")[0];
+};
+
+
 const DateTimeCountryForm = ({ updateData, initialData }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -106,12 +114,6 @@ const IpV6Controller = () => {
   const [data, setData] = useState([]);
 
   const computeInitialData = () => {
-    const get_current_date = () => new Date().toISOString().split("T")[0];
-    const get_one_month_ago_from_today_date = () => {
-      let date = new Date();
-      date.setMonth(date.getMonth() - 1);
-      return date.toISOString().split("T")[0];
-    };
     return {
       date1: get_one_month_ago_from_today_date(),
       date2: get_current_date(),

@@ -20,6 +20,10 @@ import {
   ButtonGroup,
 } from "react-bootstrap";
 import { scaleLinear } from "d3-scale";
+import {
+  get_current_date,
+  get_one_month_ago_from_today_date,
+} from "./IpV6component.js";
 
 const DateTimeForm = ({ updateDatesFunction, initialData }) => {
   const handleSubmit = (event) => {
@@ -66,9 +70,8 @@ const DnsGraphController = memo(({ setTooltipContent }) => {
     result1: defaultResult,
     result2: defaultResult,
   });
-  const get_current_date = () => new Date().toISOString().split("T")[0];
   const [dates, setDates] = useState({
-    date1: get_current_date(),
+    date1: get_one_month_ago_from_today_date(),
     date2: get_current_date(),
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -98,7 +101,7 @@ const DnsGraphController = memo(({ setTooltipContent }) => {
 
   return (
     <Container id="map">
-      <Row className="mb-3">
+      <Row>
         <DnsCountryGraph
           data={data}
           setTooltipContent={setTooltipContent}
