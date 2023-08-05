@@ -5,6 +5,7 @@ from ripe.atlas.sagan import Result, DnsResult
 import pydash as _
 import pycountry
 from ipwhois import IPWhois
+from .probes_db import probes_data
 import concurrent.futures
 
 STOPPED: int = 4
@@ -38,18 +39,20 @@ def get_probes_geolocation_list_by_id(probe_id_list: List[str]) -> List[Dict]:
     Returns:
         List[Dict]: A list of dictionaries containing the geolocation information for each probe.
     """
-    url_path = "/api/v2/probes/"
-    result = []
-    for sub_list in [
-        probe_id_list[i : i + 100] for i in range(0, len(probe_id_list), 100)
-    ]:
-        is_success, response_results = AtlasRequest(
-            **{"url_path": url_path}
-        ).get(**{"id__in": ",".join(sub_list)})
-        if is_success:
-            result.extend(response_results["results"])
-        else:
-            continue
+    # url_path = "/api/v2/probes/"
+    # result = []
+    result = [item for item in probes_data if item["id"] in probe_id_list]
+    # country_filter = {"country_code": country_code} if country_code else {}
+    # for sub_list in [
+    #     probe_id_list[i : i + 100] for i in range(0, len(probe_id_list), 100)
+    # ]:
+    #     is_success, response_results = AtlasRequest(
+    #         **{"url_path": url_path}
+    #     ).get(**{"id__in": ",".join(sub_list), **country_filter})
+    #     if is_success:
+    #         result.extend(response_results["results"])
+    #     else:
+    #         continue
     return result
 
 
@@ -286,7 +289,7 @@ def get_probes_for_country(country_code):
 
 
 def add_results_ipv6(data, day, percentage):
-    if percentage!=0:
+    if percentage != 0:
         data.append({"name": day, "ipv6": percentage})
     else:
         print()
@@ -322,7 +325,7 @@ def check_as_for_probes(country_code, start_date, finish_date):
             if amount_as_ipv6 + amount_as_ipv4 != 0
             else 0
         )
-        # ! TODO fix default value 
+        # ! TODO fix default value
         # print(f"At date {current_day} the percentage of IPv6 ASes in {country_code} is: {percentage}%")
         current_day = current_date.strftime("%Y-%m-%d")
         data = add_results_ipv6(data, current_day, percentage)
