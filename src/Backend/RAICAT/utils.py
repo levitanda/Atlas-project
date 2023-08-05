@@ -163,6 +163,28 @@ def check_dns_measurements(
     return results
 
 
+def date_range(start_date, end_date):
+    # Convert the input date strings into datetime objects
+    start_date = datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = datetime.strptime(end_date, "%Y-%m-%d")
+
+    # Calculate the difference between the two dates
+    delta = end_date - start_date
+
+    # Generate a list of all dates in the range
+    dates = [start_date + timedelta(days=i) for i in range(delta.days + 1)]
+
+    # Convert datetime objects back into strings
+    return [date.strftime("%Y-%m-%d") for date in dates]
+
+
+def dns_between_dates(start_date, end_date):
+    return [
+        {"name": date, **check_dns_measurements(date)}
+        for date in date_range(start_date, end_date)
+    ]
+
+
 # IPv6 functions
 
 
