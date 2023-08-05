@@ -266,12 +266,12 @@ def dns_data(request, first_date, second_date):
         )
     else:
         # ! for demo purposes only
-        return JsonResponse(
-            {
-                "result1": result,
-                "result2": result2,
-            }
-        )
+        # return JsonResponse(
+        #     {
+        #         "result1": result,
+        #         "result2": result2,
+        #     }
+        # )
         return JsonResponse(
             {
                 "result1": check_dns_measurements(first_date),
@@ -279,7 +279,7 @@ def dns_data(request, first_date, second_date):
             }
         )
 
-def ipv6_data(request,country, first_date, second_date):
+
+def ipv6_data(request, country, first_date, second_date):
     ipv6_result = check_as_for_probes(country, first_date, second_date)
-    print(ipv6_result)
-    return JsonResponse({"data":ipv6_result})
+    return JsonResponse({"data": ipv6_result})
