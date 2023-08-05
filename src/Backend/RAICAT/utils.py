@@ -100,14 +100,63 @@ def get_probes_ids_list_by_country(country):
     ]
 
 
-def check_dns_measurements(date):
-    measurements = get_measurements_collection_by_date_and_type(date, "dns")
-    results = []
-    for measurement in measurements:
-        measurement_hash = create_measurement_hash(measurement.get("id"))
-        results = merge_measurement_results(measurement_hash, results)
-    grouped_result = compute_average_by_country(results)
-    return prepare_results_for_frontend(grouped_result)
+def check_dns_measurements(date,):
+    country_by_probe_id = {
+        probe["id"]: probe["country_code"]
+        for probe in probes_data
+        if probe["country_code"] != None
+    }
+    params = {
+        "start": convert_to_timestamp(date),
+        # start date of measurements as unix timestamp
+        "stop": convert_to_timestamp(date, delta_days=1),
+        # tommorow date of measurements as unix timestamp
+    }
+    url_path = f"/api/v2/measurements/10209/results"
+    # this is url of recurrent DNS measurements  done by RIPE Atlas
+    _, response_results = AtlasRequest(**{"url_path": url_path}).get(**params)
+    results = (
+        _.chain(response_results)
+        .map(
+            lambda probe_dns_result: {
+                "probe_id": probe_dns_result["prb_id"],
+                "rtt_results": probe_dns_result.get("result", {}).get(
+                    "rt", -1
+                ),
+            }
+        )
+        # select only relevant fields from response
+        # in case if there is no result ( error during request), set rtt_result to -1
+        .group_by("probe_id")
+        .map_values(
+            lambda value, key: {
+                "rtt_result": compute_average(
+                    [
+                        item["rtt_results"]
+                        for item in value
+                        if item["rtt_results"] != (-1)
+                    ]
+                ),
+                "country_code": convert_two_letter_to_three_letter_code(
+                    country_by_probe_id.get(key)
+                ),
+            }
+        )
+        # we compute average rtt for each probe and its 3-letter country code
+        .values()
+        .group_by("country_code")
+        .map_values(
+            lambda value: compute_average(
+                [item["rtt_result"] for item in value]
+            )
+        )
+        # we compute average rtt for each country
+        .omit([None])
+        # we remove None keys values
+        .value()
+    )
+
+    return prepare_results_for_frontend(results)
 
 
 # IPv6 functions
