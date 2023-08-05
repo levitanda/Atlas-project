@@ -6,6 +6,8 @@ import pydash as _
 import pycountry
 from ipwhois import IPWhois
 import concurrent.futures
+from .probes_db import probes_data
+
 
 STOPPED: int = 4
 
@@ -288,17 +290,16 @@ def get_probes_for_country(country_code):
 def add_results_ipv6(data, day, percentage):
     if percentage!=0:
         data.append({"name": day, "ipv6": percentage})
-    else:
-        print()
     return data
 
 
 def check_as_for_probes(country_code, start_date, finish_date):
-    probes = get_probes_for_country(country_code)
+    #probes = get_probes_for_country(country_code)
     start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
     end_datetime = datetime.strptime(finish_date, "%Y-%m-%d")
     delta = end_datetime - start_datetime
-    ids = [item["id"] for item in probes]
+    #ids = [item["id"] for item in probes]
+    ids = [item["id"] for item in probes_data if item["country_code"] == country_code]
     results = probes_ipv6_check(ids, start_date, finish_date)
     data = []
     for i in range(delta.days + 1):
@@ -325,5 +326,5 @@ def check_as_for_probes(country_code, start_date, finish_date):
         # ! TODO fix default value 
         # print(f"At date {current_day} the percentage of IPv6 ASes in {country_code} is: {percentage}%")
         current_day = current_date.strftime("%Y-%m-%d")
-        data = add_results_ipv6(data, current_day, percentage)
+        data = add_results_ipv6(data, current_day, f"{percentage:.2f}")
     return data

@@ -11,3 +11,5 @@ src/Backend/requirements.txt
 
 .vscode/
 src/frontend/package-lock.json
+src/Backend/ipv6_deltas.py
+src/Backend/file.py
