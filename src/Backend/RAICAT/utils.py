@@ -5,131 +5,12 @@ from ripe.atlas.sagan import Result, DnsResult
 import pydash as _
 import pycountry
 from ipwhois import IPWhois
+from .probes_db import probes_data
 import concurrent.futures
 from .probes_db import probes_data
 
 
 STOPPED: int = 4
-
-
-def get_measurement_results(measurement_id: int) -> Union[Dict, None]:
-    """
-    Given a measurement ID, returns the results of the measurement.
-
-    Args:
-        measurement_id (int): The ID of the measurement.
-
-    Returns:
-        Union[Dict, None]: A dictionary containing the results of the measurement, or None if the request failed.
-    """
-    url_path = f"/api/v2/measurements/{measurement_id}/results/"
-    is_success, response_results = AtlasRequest(**{"url_path": url_path}).get()
-    if is_success:
-        return response_results
-    else:
-        return None
-
-
-def get_probes_geolocation_list_by_id(probe_id_list: List[str]) -> List[Dict]:
-    """
-    Given a list of probe IDs, returns a list of dictionaries containing the geolocation information for each probe.
-
-    Args:
-        probe_id_list (List[str]): A list of probe IDs.
-
-    Returns:
-        List[Dict]: A list of dictionaries containing the geolocation information for each probe.
-    """
-    url_path = "/api/v2/probes/"
-    result = []
-    for sub_list in [
-        probe_id_list[i : i + 100] for i in range(0, len(probe_id_list), 100)
-    ]:
-        is_success, response_results = AtlasRequest(
-            **{"url_path": url_path}
-        ).get(**{"id__in": ",".join(sub_list)})
-        if is_success:
-            result.extend(response_results["results"])
-        else:
-            continue
-    return result
-
-
-def map_measurement_result_to_probe_info(parsed_result: Result) -> Dict:
-    """
-    Given a parsed measurement result, returns a dictionary containing the probe ID and RTT results.
-
-    Args:
-        parsed_result (Result): A parsed measurement result.
-
-    Returns:
-        Dict: A dictionary containing the probe ID and RTT results.
-    """
-    return {
-        "probe_id": parsed_result.probe_id,
-        "rtt_results": [parsed_result.responses[0].response_time],
-    }
-
-
-def create_measurement_hash(measurement_id: int) -> List[Dict]:
-    """
-    Given a measurement ID, returns a list of dictionaries containing the probe ID, RTT results, and geolocation information for each probe.
-
-    Args:
-        measurement_id (int): The ID of the measurement.
-
-    Returns:
-        List[Dict]: A list of dictionaries containing the probe ID, RTT results, and geolocation information for each probe.
-    """
-
-    def find_object_by_id(collection, id):
-        for obj in collection:
-            if obj["id"] == id:
-                return obj  # Return the object if found
-
-    meausrement_results = get_measurement_results(measurement_id)
-    probes_information = [
-        map_measurement_result_to_probe_info(DnsResult(result))
-        for result in meausrement_results
-        if not DnsResult(result).is_error
-    ]
-    probes_geolocation = get_probes_geolocation_list_by_id(
-        [str(probe_obj["probe_id"]) for probe_obj in probes_information]
-    )
-    for probe_info in probes_information:
-        according_probe_geolocation = find_object_by_id(
-            probes_geolocation, probe_info["probe_id"]
-        )
-        probe_info["geolocation"] = according_probe_geolocation
-    return probes_information
-
-
-def merge_measurement_results(
-    measurement_hash: List[Dict], previous_results: List[Dict]
-) -> List[Dict]:
-    """
-    Given a list of dictionaries containing the probe ID, RTT results, and geolocation information for each probe, and a list of previous results, returns a merged list of dictionaries containing the probe ID, RTT results, and geolocation information for each probe.
-
-    Args:
-        measurement_hash (List[Dict]): A list of dictionaries containing the probe ID, RTT results, and geolocation information for each probe.
-        previous_results (List[Dict]): A list of previous results.
-
-    Returns:
-        List[Dict]: A merged list of dictionaries containing the probe ID, RTT results, and geolocation information for each probe.
-    """
-    if previous_results == []:
-        return measurement_hash
-    else:
-        for probe_info in measurement_hash:
-            for previous_probe_info in previous_results:
-                if probe_info["probe_id"] == previous_probe_info["probe_id"]:
-                    previous_probe_info["rtt_results"].extend(
-                        probe_info["rtt_results"]
-                    )
-                    break
-            else:
-                previous_results.append(probe_info)
-        return previous_results
 
 
 def compute_average(x: List[float]) -> float:
@@ -166,37 +47,6 @@ def convert_two_letter_to_three_letter_code(
         else:
             return None
     except LookupError:
-        return None
-
-
-def get_measurements_collection_by_date_and_type(
-    date: str, measurement_type: str
-) -> Union[List[Dict], None]:
-    """
-    Given a date and measurement type, returns a list of dictionaries containing information about the measurements.
-
-    Args:
-        date (str): The date in the format "YYYY-MM-DD".
-        measurement_type (str): The type of measurement.
-
-    Returns:
-        Union[List[Dict], None]: A list of dictionaries containing information about the measurements, or None if the request failed.
-    """
-    timestamp = datetime.strptime(date, "%Y-%m-%d").timestamp()
-    filters = {
-        "type": measurement_type,
-        "status": STOPPED,
-        "start_time__gte": timestamp,
-        "start_time__lt": timestamp + 24 * 60 * 60,
-        "fields": "id,start_time,stop_time,af,query_argument,query_type,result",
-    }
-    url_path = "/api/v2/measurements/"
-    is_success, response = AtlasRequest(**{"url_path": url_path}).get(
-        **filters
-    )
-    if is_success:
-        return response["results"]
-    else:
         return None
 
 
@@ -238,14 +88,103 @@ def prepare_results_for_frontend(results):
     }
 
 
-def check_dns_measurements(date):
-    measurements = get_measurements_collection_by_date_and_type(date, "dns")
-    results = []
-    for measurement in measurements:
-        measurement_hash = create_measurement_hash(measurement.get("id"))
-        results = merge_measurement_results(measurement_hash, results)
-    grouped_result = compute_average_by_country(results)
-    return prepare_results_for_frontend(grouped_result)
+def convert_to_timestamp(date_str, delta_days=0):
+    dt_object = datetime.strptime(date_str, "%Y-%m-%d")
+    dt_object += timedelta(days=delta_days)
+    return int(dt_object.timestamp())
+
+
+def get_probes_ids_list_by_country(country):
+    return [
+        str(item["id"])
+        for item in probes_data
+        if item["country_code"] == country
+    ]
+
+
+def check_dns_measurements(
+    date,
+):
+    country_by_probe_id = {
+        probe["id"]: probe["country_code"]
+        for probe in probes_data
+        if probe["country_code"] != None
+    }
+    params = {
+        "start": convert_to_timestamp(date),
+        # start date of measurements as unix timestamp
+        "stop": convert_to_timestamp(date, delta_days=1),
+        # tommorow date of measurements as unix timestamp
+    }
+    url_path = f"/api/v2/measurements/10209/results"
+    # this is url of recurrent DNS measurements  done by RIPE Atlas
+    is_success, response_results = AtlasRequest(**{"url_path": url_path}).get(
+        **params
+    )
+    results = (
+        _.chain(response_results)
+        .map(
+            lambda probe_dns_result: {
+                "probe_id": probe_dns_result["prb_id"],
+                "rtt_results": probe_dns_result.get("result", {}).get(
+                    "rt", -1
+                ),
+            }
+        )
+        # select only relevant fields from response
+        # in case if there is no result ( error during request), set rtt_result to -1
+        .group_by("probe_id")
+        .map_values(
+            lambda value, key: {
+                "rtt_result": compute_average(
+                    [
+                        item["rtt_results"]
+                        for item in value
+                        if item["rtt_results"] != (-1)
+                    ]
+                ),
+                "country_code": convert_two_letter_to_three_letter_code(
+                    country_by_probe_id.get(key)
+                ),
+            }
+        )
+        # we compute average rtt for each probe and its 3-letter country code
+        .values()
+        .group_by("country_code")
+        .map_values(
+            lambda value: compute_average(
+                [item["rtt_result"] for item in value]
+            )
+        )
+        # we compute average rtt for each country
+        .omit([None])
+        # we remove None keys values
+        .value()
+    )
+
+    return results
+
+
+def date_range(start_date, end_date):
+    # Convert the input date strings into datetime objects
+    start_date = datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = datetime.strptime(end_date, "%Y-%m-%d")
+
+    # Calculate the difference between the two dates
+    delta = end_date - start_date
+
+    # Generate a list of all dates in the range
+    dates = [start_date + timedelta(days=i) for i in range(delta.days + 1)]
+
+    # Convert datetime objects back into strings
+    return [date.strftime("%Y-%m-%d") for date in dates]
+
+
+def dns_between_dates(start_date, end_date):
+    return [
+        {"name": date, **check_dns_measurements(date)}
+        for date in date_range(start_date, end_date)
+    ]
 
 
 # IPv6 functions
@@ -288,7 +227,7 @@ def get_probes_for_country(country_code):
 
 
 def add_results_ipv6(data, day, percentage):
-    if percentage!=0:
+    if percentage != 0:
         data.append({"name": day, "ipv6": percentage})
     return data
 
@@ -323,7 +262,7 @@ def check_as_for_probes(country_code, start_date, finish_date):
             if amount_as_ipv6 + amount_as_ipv4 != 0
             else 0
         )
-        # ! TODO fix default value 
+        # ! TODO fix default value
         # print(f"At date {current_day} the percentage of IPv6 ASes in {country_code} is: {percentage}%")
         current_day = current_date.strftime("%Y-%m-%d")
         data = add_results_ipv6(data, current_day, f"{percentage:.2f}")
