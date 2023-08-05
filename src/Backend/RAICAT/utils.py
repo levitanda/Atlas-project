@@ -100,7 +100,9 @@ def get_probes_ids_list_by_country(country):
     ]
 
 
-def check_dns_measurements(date,):
+def check_dns_measurements(
+    date,
+):
     country_by_probe_id = {
         probe["id"]: probe["country_code"]
         for probe in probes_data
@@ -114,7 +116,9 @@ def check_dns_measurements(date,):
     }
     url_path = f"/api/v2/measurements/10209/results"
     # this is url of recurrent DNS measurements  done by RIPE Atlas
-    _, response_results = AtlasRequest(**{"url_path": url_path}).get(**params)
+    is_success, response_results = AtlasRequest(**{"url_path": url_path}).get(
+        **params
+    )
     results = (
         _.chain(response_results)
         .map(
@@ -156,7 +160,7 @@ def check_dns_measurements(date,):
         .value()
     )
 
-    return prepare_results_for_frontend(results)
+    return results
 
 
 # IPv6 functions
