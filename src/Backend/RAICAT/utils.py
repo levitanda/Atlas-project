@@ -239,6 +239,20 @@ def prepare_results_for_frontend(results):
     }
 
 
+def convert_to_timestamp(date_str, delta_days=0):
+    dt_object = datetime.strptime(date_str, "%Y-%m-%d")
+    dt_object += timedelta(days=delta_days)
+    return int(dt_object.timestamp())
+
+
+def get_probes_ids_list_by_country(country):
+    return [
+        str(item["id"])
+        for item in probes_data
+        if item["country_code"] == country
+    ]
+
+
 def check_dns_measurements(date):
     measurements = get_measurements_collection_by_date_and_type(date, "dns")
     results = []
