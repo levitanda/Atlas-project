@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from "react";
+import React, { useState, useEffect, useMemo, memo } from "react";
 import {
   ZoomableGroup,
   ComposableMap,
@@ -11,14 +11,7 @@ import { PatternLines } from "@vx/pattern";
 import "react-tooltip/dist/react-tooltip.css";
 import { Tooltip } from "react-tooltip";
 import { geojson } from "./geo_data.js";
-import {
-  Container,
-  Row,
-  Form,
-  Button,
-  Col,
-  ButtonGroup,
-} from "react-bootstrap";
+import { Container, Row, Form, Button, Col } from "react-bootstrap";
 import { scaleLinear } from "d3-scale";
 import { get_current_date } from "./IpV6component.js";
 import {
@@ -30,19 +23,21 @@ import {
   Tooltip as ChartTooltip,
   Legend,
   ResponsiveContainer,
+  Brush,
 } from "recharts";
+import Select from "react-select";
 
-const DateTimeForm = ({ updateDatesFunction, defaultDate }) => {
+const DateChooseForm = ({ updateDatesFunction, defaultDate }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
-    updateDatesFunction(event.target.date1.value);
+    updateDatesFunction(event.target.date.value);
   };
 
   return (
     <Form onSubmit={handleSubmit}>
       <Row className="d-flex align-items-end justify-content-center">
         <Col md={3}>
-          <Form.Group controlId="date1">
+          <Form.Group controlId="date">
             <Form.Label>Date</Form.Label>
             <Form.Control type="date" defaultValue={defaultDate} />
           </Form.Group>
@@ -99,8 +94,8 @@ const DnsGraphController = memo(
           />
         </Row>
         {!isLoading ? (
-          <Row className="mb-3">
-            <DateTimeForm
+          <Row>
+            <DateChooseForm
               updateDatesFunction={upddateDate}
               defaultDate={date}
             />
@@ -114,18 +109,31 @@ const DnsGraphController = memo(
 );
 
 const DnsCountyLineChart = ({ initial_country_code, initial_date }) => {
+  const geo_options = useMemo(
+    () =>
+      geojson.objects.world.geometries.map((item) => {
+        return { value: item.id, label: item.properties.name };
+      }),
+    []
+  );
   const [state, setState] = useState({
     data: [],
     isLoading: true,
-    startDate: "2020-01-02",
-    endDate: "2020-01-03",
-    countries: [initial_country_code],
+    startDate: initial_date,
+    endDate: "2020-06-30",
+    countries: [geo_options.find((item) => item.value == initial_country_code)],
   });
   const setIsLoadingState = (loadingState) => {
     setState({ ...state, isLoading: loadingState });
   };
   const updateData = (newData) => {
     setState({ ...state, data: newData });
+  };
+  const updateSelectedCountries = (newCountries) => {
+    setState({ ...state, countries: newCountries });
+  };
+  const updateDates = (newStartDate, newEndDate) => {
+    setState({ ...state, startDate: newStartDate, endDate: newEndDate });
   };
   useEffect(() => {
     const fetchData = async () => {
@@ -144,34 +152,97 @@ const DnsCountyLineChart = ({ initial_country_code, initial_date }) => {
     };
     fetchData();
   }, [state.startDate, state.endDate]);
+
   return (
-    <Container
-      style={{
-        marginTop: "10px",
-        height: "75vh",
-        border: "1px solid black",
-        borderRadius: "10px",
-      }}
-    >
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={state.data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <ChartTooltip />
-          <Legend />
-          <Line
-            type="monotone"
-            dataKey={state.countries[0]}
-            stroke="#8884d8"
-            activeDot={{ r: 8 }}
-          />
-          {/* <Line type="monotone" dataKey="uv" stroke="#82ca9d" /> */}
-        </LineChart>
-      </ResponsiveContainer>
+    <Container>
+      <Row>
+        <Container
+          style={{
+            marginTop: "10px",
+            height: "75vh",
+            border: "1px solid black",
+            borderRadius: "10px",
+          }}
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={state.data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <ChartTooltip />
+              <Legend />
+              {state.countries.map((country) => (
+                <Line
+                  type="monotone"
+                  dataKey={country.value}
+                  stroke="#8884d8"
+                  activeDot={{ r: 8 }}
+                />
+              ))}
+              <Brush />
+            </LineChart>
+          </ResponsiveContainer>
+        </Container>
+      </Row>
+      <DatesCountryForm
+        updateDates={updateDates}
+        updateSelectedCountries={updateSelectedCountries}
+        state={state}
+        geo_options={geo_options}
+      />
     </Container>
   );
 };
+
+function DatesCountryForm(
+  updateDates,
+  updateSelectedCountries,
+  state,
+  geo_options
+) {
+  return (
+    <Form
+      onSubmit={(event) => {
+        event.preventDefault();
+        updateDates(event.target.start_date.value, event.target.end_date.value);
+      }}
+    >
+      <Row className="d-flex align-items-end justify-content-center">
+        <Form.Group as={Col} md={3} controlId="country">
+          <Form.Label>Country</Form.Label>
+          <Select
+            isMulti
+            styles={{
+              menuList: (provided, state) => ({
+                ...provided,
+                maxHeight: "80px",
+              }),
+            }}
+            onChange={(selected) => {
+              updateSelectedCountries(selected);
+            }}
+            value={state.countries}
+            options={geo_options}
+          />
+        </Form.Group>
+        <Form.Group as={Col} md={3} controlId="start_date">
+          <Form.Label>Start Date</Form.Label>
+          <Form.Control defaultValue={state.startDate} type="date" />
+        </Form.Group>
+        <Form.Group as={Col} md={3} controlId="end_date">
+          <Form.Label>End Date</Form.Label>
+          <Form.Control defaultValue={state.endDate} type="date" />
+        </Form.Group>
+        <Col md={1}>
+          <Button variant="primary" type="submit">
+            Submit
+          </Button>
+        </Col>
+      </Row>
+    </Form>
+  );
+}
+
 function DnsCountryGraph({
   data,
   setTooltipContent,
