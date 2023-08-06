@@ -14,7 +14,10 @@ import { Tooltip } from "react-tooltip";
 import { geojson } from "./geo_data.js";
 import { Container, Row, Form, Button, Col } from "react-bootstrap";
 import { scaleLinear } from "d3-scale";
-import { get_current_date } from "./IpV6component.js";
+import {
+  get_current_date,
+  get_n_days_ago_from_current_date,
+} from "./IpV6component.js";
 import {
   LineChart,
   Line,
@@ -54,7 +57,13 @@ const DateChooseForm = ({ updateDatesFunction, defaultDate }) => {
 };
 
 const DnsGraphController = memo(
-  ({ setTooltipContent, changeMode, setCountryCode, setCountryChartDate }) => {
+  ({
+    setTooltipContent,
+    changeMode,
+    setCountryCode,
+    setCountryChartDate,
+    countryChartDate,
+  }) => {
     const defaultResult = {
       data: {},
       average: 0,
@@ -62,7 +71,7 @@ const DnsGraphController = memo(
       max: 0,
     };
     const [data, setData] = useState(defaultResult);
-    const [date, setDate] = useState(get_current_date());
+    const [date, setDate] = useState(countryChartDate);
     const upddateDate = (newDate) => {
       setDate(newDate);
       setCountryChartDate(newDate);
@@ -109,7 +118,12 @@ const DnsGraphController = memo(
   }
 );
 
-const DnsCountyLineChart = ({ initial_country_code, initial_date }) => {
+const DnsCountyLineChart = ({
+  initial_country_code,
+  initial_date,
+  changeMode,
+  setCountryChartDate,
+}) => {
   const geo_options = useMemo(
     () =>
       geojson.objects.world.geometries.map((item) => {
@@ -121,8 +135,8 @@ const DnsCountyLineChart = ({ initial_country_code, initial_date }) => {
   const [state, setState] = useState({
     data: [],
     isLoading: true,
-    startDate: initial_date,
-    endDate: "2020-06-30",
+    startDate: get_n_days_ago_from_current_date(4),
+    endDate: initial_date,
     countries: [geo_options.find((item) => item.value == initial_country_code)],
   });
   const setIsLoadingState = (loadingState) => {
@@ -145,7 +159,6 @@ const DnsCountyLineChart = ({ initial_country_code, initial_date }) => {
           `/dns_data_line/${state.startDate}/${state.endDate}/`
         );
         const jsonData = await response.json();
-        console.log(jsonData.data);
         setIsLoadingState(false);
         updateData(jsonData.data);
       } catch (error) {
@@ -154,48 +167,15 @@ const DnsCountyLineChart = ({ initial_country_code, initial_date }) => {
     };
     fetchData();
   }, [state.startDate, state.endDate]);
-  const colorScale = scaleLinear()
-    .domain([0, state.countries.length])
-    .range(["red", "blue"])
-    .interpolate(interpolateRgb);
-
-  // Generate 10 contrast colors
-  const colors = Array.from({ length: state.countries.length }, (_, i) =>
-    colorScale(i)
-  );
 
   return (
     <Container>
       <Row>
-        <Container
-          style={{
-            marginTop: "10px",
-            height: "75vh",
-            border: "1px solid black",
-            borderRadius: "10px",
-          }}
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={state.data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <ChartTooltip />
-              <Legend />
-              {state.countries.map((country, index) => (
-                <Line
-                  key={country.value}
-                  type="monotone"
-                  dataKey={country.value}
-                  // stroke="#8884d8"
-                  stroke={colors[index]}
-                  activeDot={{ r: 8 }}
-                />
-              ))}
-              <Brush />
-            </LineChart>
-          </ResponsiveContainer>
-        </Container>
+        <DnsLineChartGraphBody
+          state={state}
+          changeMode={changeMode}
+          setCountryChartDate={setCountryChartDate}
+        />
       </Row>
       <DatesCountryForm
         updateDates={updateDates}
@@ -206,6 +186,54 @@ const DnsCountyLineChart = ({ initial_country_code, initial_date }) => {
     </Container>
   );
 };
+
+function DnsLineChartGraphBody({ state, changeMode, setCountryChartDate }) {
+  const colorScale = scaleLinear()
+    .domain([0, state.countries.length])
+    .range(["red", "blue"])
+    .interpolate(interpolateRgb);
+
+  // Generate n contrast colors
+  const colors = Array.from({ length: state.countries.length }, (_, i) =>
+    colorScale(i)
+  );
+  return (
+    <Container
+      style={{
+        marginTop: "10px",
+        height: "75vh",
+        border: "1px solid black",
+        borderRadius: "10px",
+      }}
+    >
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={state.data}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <ChartTooltip />
+          <Legend />
+          {state.countries.map((country, index) => (
+            <Line
+              key={country.value}
+              type="monotone"
+              dataKey={country.value}
+              stroke={colors[index]}
+              activeDot={{
+                r: 8,
+                onClick: (event, payload) => {
+                  setCountryChartDate(payload.payload["name"]);
+                  changeMode("whole_world");
+                },
+              }}
+            />
+          ))}
+          <Brush />
+        </LineChart>
+      </ResponsiveContainer>
+    </Container>
+  );
+}
 
 function DatesCountryForm({
   updateDates,
@@ -342,7 +370,12 @@ function DnsCountryGraph({
   );
 }
 
-function DnsGraphComponent({ changeMode, selectCountry, setCountryChartDate }) {
+function DnsGraphComponent({
+  changeMode,
+  selectCountry,
+  setCountryChartDate,
+  countryChartDate,
+}) {
   const [tooltip_content, setTooltipContent] = useState("");
   return (
     <React.Fragment>
@@ -351,6 +384,7 @@ function DnsGraphComponent({ changeMode, selectCountry, setCountryChartDate }) {
         changeMode={changeMode}
         setCountryCode={selectCountry}
         setCountryChartDate={setCountryChartDate}
+        countryChartDate={countryChartDate}
       />
       <Tooltip anchorSelect="#map" content={tooltip_content} float />
     </React.Fragment>
@@ -369,13 +403,16 @@ const DnsPageController = () => {
           changeMode={changeMode}
           selectCountry={setCountryCode}
           setCountryChartDate={setCountryChartDate}
+          countryChartDate={country_chart_date}
         />
       );
     } else if (mode == "selected_countries") {
       return (
         <DnsCountyLineChart
           initial_country_code={country_code}
+          setCountryChartDate={setCountryChartDate}
           initial_date={country_chart_date}
+          changeMode={changeMode}
         />
       );
     }
