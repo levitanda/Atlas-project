@@ -1,12 +1,11 @@
 import { useState } from "react";
 import Tab from "react-bootstrap/Tab";
-import Stack from "react-bootstrap/Stack";
 import Tabs from "react-bootstrap/Tabs";
 import DnsGraphComponent from "./DnsGraph";
 import IpV6component from "./IpV6component";
 
 function ControlledTabsExample() {
-  const [key, setKey] = useState("IPv6");
+  const [key, setKey] = useState("DNS");
 
   return (
     <Tabs
