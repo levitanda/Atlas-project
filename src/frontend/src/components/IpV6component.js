@@ -182,7 +182,7 @@ const IpV6Controller = () => {
   );
 };
 
-function LoadingSpinner() {
+export function LoadingSpinner() {
   return (
     <div
       className="d-flex justify-content-center align-items-center"
