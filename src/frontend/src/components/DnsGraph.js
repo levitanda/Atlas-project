@@ -135,10 +135,10 @@ const DnsCountyLineChart = ({
 
   const [state, setState] = useState({
     data: [],
-    // startDate: get_n_days_ago_from_current_date(2),
-    // endDate: initial_date,
-    startDate: "2018-12-31",
-    endDate: "2023-01-02",
+    startDate: get_n_days_ago_from_current_date(2),
+    endDate: initial_date,
+    // startDate: "2018-12-31",
+    // endDate: "2023-01-02",
     countries: [geo_options.find((item) => item.value == initial_country_code)],
   });
   const setIsLoadingState = (loadingState) => {
@@ -252,8 +252,8 @@ function DatesCountryForm({
     <Form
       onSubmit={(event) => {
         event.preventDefault();
-        const date1 = new Date(event.target.startDate.value);
-        const date2 = new Date(event.target.endDate.value);
+        const date1 = new Date(event.target.start_date.value);
+        const date2 = new Date(event.target.end_date.value);
         const today = new Date();
 
         // set the hours, minutes, seconds and milliseconds to 0 to compare only the date part
@@ -269,6 +269,7 @@ function DatesCountryForm({
           alert("Start date cannot be after end date!");
           return;
         }
+        
         updateDates(event.target.start_date.value, event.target.end_date.value);
       }}
     >
