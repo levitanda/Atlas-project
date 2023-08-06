@@ -19,7 +19,7 @@ from django.urls import path, re_path
 from django.conf import settings
 from cra_helper.views import proxy_cra_requests
 from django.views.generic import TemplateView
-from .views import dns_data, ipv6_data
+from .views import dns_data, ipv6_data, dns_data_line
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -27,6 +27,11 @@ urlpatterns = [
         r"^dns_data/(?P<date>\d{4}-\d{2}-\d{2})/$",
         dns_data,
         name="dns_data",
+    ),
+    re_path(
+        r"^dns_data_line/(?P<start_date>\d{4}-\d{2}-\d{2})/(?P<end_date>\d{4}-\d{2}-\d{2})/$",
+        dns_data_line,
+        name="dns_data_line",
     ),
     path("raicat/", TemplateView.as_view(template_name="entry_point.html")),
     re_path(

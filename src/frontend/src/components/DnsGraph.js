@@ -64,6 +64,7 @@ const DnsGraphController = memo(({ setTooltipContent }) => {
   };
   const choosenData = data[`${choosenResult}`];
   const [mode, changeMode] = useState("whole_world");
+  const [country_code, setCountryCode] = useState();
   // const [mode, changemode] = useState("selected_countries");
   const renderContent = () => {
     if (mode == "whole_world") {
@@ -72,10 +73,16 @@ const DnsGraphController = memo(({ setTooltipContent }) => {
           data={data}
           setTooltipContent={setTooltipContent}
           changeModeHandler={changeMode}
+          changeCountryCodeHandler={setCountryCode}
         />
       );
     } else if (mode == "selected_countries") {
-      return <DnsCountyLineChart />;
+      return (
+        <DnsCountyLineChart
+          initial_country_code={country_code}
+          initial_date={date}
+        />
+      );
     }
   };
   useEffect(() => {
@@ -125,7 +132,37 @@ const ColorByDateChooser = ({ choosenResult, handleButtonClick }) => {
     </ButtonGroup>
   );
 };
-const DnsCountyLineChart = ({}) => {
+const DnsCountyLineChart = ({ initial_country_code, initial_date }) => {
+  const [state, setState] = useState({
+    data: [],
+    isLoading: true,
+    startDate: initial_date,
+    endDate: initial_date,
+    countries: [initial_country_code],
+  });
+  const setIsLoadingState = (loadingState) => {
+    setState({ ...state, isLoading: loadingState });
+  };
+  const updateData = (newData) => {
+    setState({ ...state, data: newData });
+  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoadingState(true);
+        const response = await fetch(
+          `/dns_data_line/${state.startDate}/${state.endDate}/`
+        );
+        const jsonData = await response.json();
+        console.log(jsonData.data);
+        setIsLoadingState(false);
+        updateData(jsonData.data);
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
+    fetchData();
+  }, [state.startDate, state.endDate]);
   return (
     <Container
       style={{
@@ -134,10 +171,19 @@ const DnsCountyLineChart = ({}) => {
         border: "1px solid black",
         borderRadius: "10px",
       }}
-    />
+    >
+      {initial_country_code}
+      {"\n"}
+      {initial_date}
+    </Container>
   );
 };
-function DnsCountryGraph({ data, setTooltipContent, changeModeHandler }) {
+function DnsCountryGraph({
+  data,
+  setTooltipContent,
+  changeModeHandler,
+  changeCountryCodeHandler,
+}) {
   const colorScale = scaleLinear()
     .domain([data["min"], data["average"], data["max"]])
     .range(["green", "yellow", "red"]);
@@ -185,6 +231,7 @@ function DnsCountryGraph({ data, setTooltipContent, changeModeHandler }) {
                   setTooltipContent(`${name}: \n${dns_result_with_unit}`);
                 }}
                 onClick={() => {
+                  changeCountryCodeHandler(geo.id);
                   changeModeHandler("selected_countries");
                   setTooltipContent("");
                 }}
