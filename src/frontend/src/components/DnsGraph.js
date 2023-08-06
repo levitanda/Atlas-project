@@ -15,6 +15,7 @@ import { geojson } from "./geo_data.js";
 import { Container, Row, Form, Button, Col } from "react-bootstrap";
 import { scaleLinear } from "d3-scale";
 import {
+  LoadingSpinner,
   get_current_date,
   get_n_days_ago_from_current_date,
 } from "./IpV6component.js";
@@ -134,8 +135,7 @@ const DnsCountyLineChart = ({
 
   const [state, setState] = useState({
     data: [],
-    isLoading: true,
-    startDate: get_n_days_ago_from_current_date(4),
+    startDate: get_n_days_ago_from_current_date(2),
     endDate: initial_date,
     countries: [geo_options.find((item) => item.value == initial_country_code)],
   });
@@ -167,22 +167,27 @@ const DnsCountyLineChart = ({
     };
     fetchData();
   }, [state.startDate, state.endDate]);
-
   return (
     <Container>
-      <Row>
-        <DnsLineChartGraphBody
-          state={state}
-          changeMode={changeMode}
-          setCountryChartDate={setCountryChartDate}
-        />
-      </Row>
-      <DatesCountryForm
-        updateDates={updateDates}
-        updateSelectedCountries={updateSelectedCountries}
-        state={state}
-        geo_options={geo_options}
-      />
+      {!state.isLoading ? (
+        <React.Fragment>
+          <Row>
+            <DnsLineChartGraphBody
+              state={state}
+              changeMode={changeMode}
+              setCountryChartDate={setCountryChartDate}
+            />
+          </Row>
+          <DatesCountryForm
+            updateDates={updateDates}
+            updateSelectedCountries={updateSelectedCountries}
+            state={state}
+            geo_options={geo_options}
+          />
+        </React.Fragment>
+      ) : (
+        <LoadingSpinner />
+      )}
     </Container>
   );
 };
@@ -333,7 +338,7 @@ function DnsCountryGraph({
                   const name = geo.properties.name;
                   const dns_result = data["data"][`${geo.id}`] || "NA";
                   const dns_result_with_unit =
-                    dns_result != "NA" ? `${dns_result} ms` : dns_result;
+                    dns_result !== "NA" ? `${dns_result} ms` : dns_result;
                   setTooltipContent(`${name}: \n${dns_result_with_unit}`);
                 }}
                 onClick={() => {
@@ -397,7 +402,7 @@ const DnsPageController = () => {
     get_current_date()
   );
   const renderContent = () => {
-    if (mode == "whole_world") {
+    if (mode === "whole_world") {
       return (
         <DnsGraphComponent
           changeMode={changeMode}
@@ -406,7 +411,7 @@ const DnsPageController = () => {
           countryChartDate={country_chart_date}
         />
       );
-    } else if (mode == "selected_countries") {
+    } else if (mode === "selected_countries") {
       return (
         <DnsCountyLineChart
           initial_country_code={country_code}
