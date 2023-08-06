@@ -8,7 +8,7 @@ import {
   Sphere,
   Graticule,
 } from "react-simple-maps";
-import { PatternLines } from "@vx/pattern";
+import { PatternLines } from "@visx/pattern";
 import "react-tooltip/dist/react-tooltip.css";
 import { Tooltip } from "react-tooltip";
 import { geojson } from "./geo_data.js";
