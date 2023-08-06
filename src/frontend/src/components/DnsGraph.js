@@ -22,16 +22,14 @@ import {
 import { scaleLinear } from "d3-scale";
 import {
   get_current_date,
-  get_one_month_ago_from_today_date,
 } from "./IpV6component.js";
 
-const DateTimeForm = ({ updateDatesFunction, initialData }) => {
+const DateTimeForm = ({ updateDatesFunction, defaultDate }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
-    updateDatesFunction({
-      date1: event.target.date1.value,
-      date2: event.target.date2.value,
-    });
+    updateDatesFunction(
+      event.target.date1.value
+    );
   };
 
   return (
@@ -39,14 +37,8 @@ const DateTimeForm = ({ updateDatesFunction, initialData }) => {
       <Row className="d-flex align-items-end justify-content-center">
         <Col md={3}>
           <Form.Group controlId="date1">
-            <Form.Label>Reference Date</Form.Label>
-            <Form.Control type="date" defaultValue={initialData["date1"]} />
-          </Form.Group>
-        </Col>
-        <Col md={3}>
-          <Form.Group controlId="date2">
-            <Form.Label>Compare Date</Form.Label>
-            <Form.Control type="date" defaultValue={initialData["date2"]} />
+            <Form.Label>Date</Form.Label>
+            <Form.Control type="date" defaultValue={defaultDate} />
           </Form.Group>
         </Col>
         <Col md={1}>
@@ -66,16 +58,10 @@ const DnsGraphController = memo(({ setTooltipContent }) => {
     min: 0,
     max: 0,
   };
-  const [data, setData] = useState({
-    result1: defaultResult,
-    result2: defaultResult,
-  });
-  const [dates, setDates] = useState({
-    date1: get_one_month_ago_from_today_date(),
-    date2: get_current_date(),
-  });
+  const [data, setData] = useState(defaultResult);
+  const [date, setDates] = useState(get_current_date());
   const [isLoading, setIsLoading] = useState(true);
-  const [choosenResult, setSelectedButton] = useState("result1");
+  const [choosenResult, setSelectedButton] = useState("result");
 
   const handleButtonClick = (button) => {
     setSelectedButton(button);
@@ -86,11 +72,7 @@ const DnsGraphController = memo(({ setTooltipContent }) => {
   const renderContent = () => {
     if (mode == "whole_world") {
       return (
-        <DnsCountryGraph
-          data={data}
-          setTooltipContent={setTooltipContent}
-          choosenData={choosenData}
-        />
+        <DnsCountryGraph data={data} setTooltipContent={setTooltipContent} />
       );
     } else if (mode == "selected_countries") {
       return (
@@ -109,9 +91,7 @@ const DnsGraphController = memo(({ setTooltipContent }) => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(
-          `/dns_data/first_date=${dates["date1"]}&second_date=${dates["date2"]}`
-        );
+        const response = await fetch(`/dns_data/${date}`);
         const jsonData = await response.json();
         setData(jsonData);
         setIsLoading(false);
@@ -120,29 +100,17 @@ const DnsGraphController = memo(({ setTooltipContent }) => {
       }
     };
     fetchData();
-  }, [dates]);
+  }, [date]);
 
   return (
     <Container id="map">
       <Row>{renderContent()}</Row>
       {!isLoading ? (
         <Row className="mb-3">
-          <DateTimeForm updateDatesFunction={setDates} initialData={dates} />
+          <DateTimeForm updateDatesFunction={setDates} defaultDate={date} />
         </Row>
       ) : (
         "Loading"
-      )}
-      {!isLoading ? (
-        <Row>
-          <Col>
-            <ColorByDateChooser
-              choosenResult={choosenResult}
-              handleButtonClick={handleButtonClick}
-            />
-          </Col>
-        </Row>
-      ) : (
-        ""
       )}
     </Container>
   );
@@ -167,9 +135,9 @@ const ColorByDateChooser = ({ choosenResult, handleButtonClick }) => {
   );
 };
 
-function DnsCountryGraph({ data, setTooltipContent, choosenData }) {
+function DnsCountryGraph({ data, setTooltipContent }) {
   const colorScale = scaleLinear()
-    .domain([choosenData["min"], choosenData["average"], choosenData["max"]])
+    .domain([data["min"], data["average"], data["max"]])
     .range(["green", "yellow", "red"]);
   return (
     <ComposableMap
@@ -209,17 +177,10 @@ function DnsCountryGraph({ data, setTooltipContent, choosenData }) {
                 geography={geo}
                 onMouseEnter={() => {
                   const name = geo.properties.name;
-                  const reference_result =
-                    data["result1"]["data"][`${geo.id}`] || "NA";
-                  const ref_string = `ref: \n${reference_result}${
-                    reference_result === "NA" ? "" : "ms"
-                  }`;
-                  const compare_result =
-                    data["result2"]["data"][`${geo.id}`] || "NA";
-                  const cmp_string = `cmp: \n${compare_result}${
-                    compare_result === "NA" ? "" : "ms"
-                  }`;
-                  setTooltipContent(`${name}: \n${ref_string}\n${cmp_string}`);
+                  const dns_result = data["data"][`${geo.id}`] || "NA";
+                  const dns_result_with_unit =
+                    dns_result != "NA" ? `${dns_result} ms` : dns_result;
+                  setTooltipContent(`${name}: \n${dns_result_with_unit}`);
                 }}
                 onMouseLeave={() => {
                   setTooltipContent("");
@@ -227,8 +188,8 @@ function DnsCountryGraph({ data, setTooltipContent, choosenData }) {
                 stroke="#81a7e3"
                 style={{
                   default: {
-                    fill: choosenData["data"][`${geo.id}`]
-                      ? colorScale(choosenData["data"][`${geo.id}`])
+                    fill: data["data"][`${geo.id}`]
+                      ? colorScale(data["data"][`${geo.id}`])
                       : "url('#lines')",
                     outline: "none",
                   },

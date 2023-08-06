@@ -24,7 +24,7 @@ from .views import dns_data, ipv6_data
 urlpatterns = [
     path("admin/", admin.site.urls),
     re_path(
-        r"^dns_data/first_date=(?P<first_date>\d{4}-\d{2}-\d{2})&second_date=(?P<second_date>\d{4}-\d{2}-\d{2})/$",
+        r"^dns_data/(?P<date>\d{4}-\d{2}-\d{2})/$",
         dns_data,
         name="dns_data",
     ),

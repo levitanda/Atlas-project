@@ -6,28 +6,9 @@ from .utils import (
 )
 
 
-def dns_data(request, first_date, second_date):
-    if first_date == second_date:
-        dns_result = prepare_results_for_frontend(
-            check_dns_measurements(first_date)
-        )
-        return JsonResponse(
-            {
-                "result1": dns_result,
-                "result2": dns_result,
-            }
-        )
-    else:
-        return JsonResponse(
-            {
-                "result1": prepare_results_for_frontend(
-                    check_dns_measurements(first_date)
-                ),
-                "result2": prepare_results_for_frontend(
-                    check_dns_measurements(second_date)
-                ),
-            }
-        )
+def dns_data(request, date):
+    dns_result = prepare_results_for_frontend(check_dns_measurements(date))
+    return JsonResponse(dns_result)
 
 
 def ipv6_data(request, country, first_date, second_date):
