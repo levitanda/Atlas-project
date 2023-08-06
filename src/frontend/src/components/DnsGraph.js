@@ -75,6 +75,36 @@ const DnsGraphController = memo(({ setTooltipContent }) => {
     date2: get_current_date(),
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [choosenResult, setSelectedButton] = useState("result1");
+
+  const handleButtonClick = (button) => {
+    setSelectedButton(button);
+  };
+  const choosenData = data[`${choosenResult}`];
+  const [mode, changemode] = useState("whole_world");
+  // const [mode, changemode] = useState("selected_countries");
+  const renderContent = () => {
+    if (mode == "whole_world") {
+      return (
+        <DnsCountryGraph
+          data={data}
+          setTooltipContent={setTooltipContent}
+          choosenData={choosenData}
+        />
+      );
+    } else if (mode == "selected_countries") {
+      return (
+        <Container
+          style={{
+            marginTop: "10px",
+            height: "75vh",
+            border: "1px solid black",
+            borderRadius: "10px",
+          }}
+        />
+      );
+    }
+  };
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -92,22 +122,9 @@ const DnsGraphController = memo(({ setTooltipContent }) => {
     fetchData();
   }, [dates]);
 
-  const [choosenResult, setSelectedButton] = useState("result1");
-
-  const handleButtonClick = (button) => {
-    setSelectedButton(button);
-  };
-  const choosenData = data[`${choosenResult}`];
-
   return (
     <Container id="map">
-      <Row>
-        <DnsCountryGraph
-          data={data}
-          setTooltipContent={setTooltipContent}
-          choosenData={choosenData}
-        />
-      </Row>
+      <Row>{renderContent()}</Row>
       {!isLoading ? (
         <Row className="mb-3">
           <DateTimeForm updateDatesFunction={setDates} initialData={dates} />
