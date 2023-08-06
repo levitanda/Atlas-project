@@ -57,86 +57,62 @@ const DateTimeForm = ({ updateDatesFunction, defaultDate }) => {
   );
 };
 
-const DnsGraphController = memo(({ setTooltipContent }) => {
-  const defaultResult = {
-    data: {},
-    average: 0,
-    min: 0,
-    max: 0,
-  };
-  const [data, setData] = useState(defaultResult);
-  const [date, setDates] = useState(get_current_date());
-  const [isLoading, setIsLoading] = useState(true);
-  
-  const [mode, changeMode] = useState("whole_world");
-  const [country_code, setCountryCode] = useState();
-  // const [mode, changemode] = useState("selected_countries");
-  const renderContent = () => {
-    if (mode == "whole_world") {
-      return (
-        <DnsCountryGraph
-          data={data}
-          setTooltipContent={setTooltipContent}
-          changeModeHandler={changeMode}
-          changeCountryCodeHandler={setCountryCode}
-        />
-      );
-    } else if (mode == "selected_countries") {
-      return (
-        <DnsCountyLineChart
-          initial_country_code={country_code}
-          initial_date={date}
-        />
-      );
-    }
-  };
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch(`/dns_data/${date}`);
-        const jsonData = await response.json();
-        setData(jsonData);
-        setIsLoading(false);
-      } catch (error) {
-        console.log(error.message);
-      }
+const DnsGraphController = memo(
+  ({ setTooltipContent, changeMode, setCountryCode, setCountryChartDate }) => {
+    const defaultResult = {
+      data: {},
+      average: 0,
+      min: 0,
+      max: 0,
     };
-    fetchData();
-  }, [date]);
+    const [data, setData] = useState(defaultResult);
+    const [date, setDate] = useState(get_current_date());
+    const upddateDate = (newDate) => {
+      setDate(newDate);
+      setCountryChartDate(newDate);
+    };
 
-  return (
-    <Container id="map">
-      <Row>{renderContent()}</Row>
-      {!isLoading ? (
-        <Row className="mb-3">
-          <DateTimeForm updateDatesFunction={setDates} defaultDate={date} />
+    const [isLoading, setIsLoading] = useState(true);
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          setIsLoading(true);
+          const response = await fetch(`/dns_data/${date}`);
+          const jsonData = await response.json();
+          setData(jsonData);
+          setIsLoading(false);
+        } catch (error) {
+          console.log(error.message);
+        }
+      };
+      fetchData();
+    }, [date]);
+
+    return (
+      <Container id="map">
+        <Row>
+          <DnsCountryGraph
+            data={data}
+            setTooltipContent={setTooltipContent}
+            changeModeHandler={changeMode}
+            changeCountryCodeHandler={setCountryCode}
+          />
         </Row>
-      ) : (
-        "Loading"
-      )}
-    </Container>
-  );
-});
+        {!isLoading ? (
+          <Row className="mb-3">
+            <DateTimeForm
+              updateDatesFunction={upddateDate}
+              defaultDate={date}
+            />
+          </Row>
+        ) : (
+          "Loading"
+        )}
+      </Container>
+    );
+  }
+);
 
-const ColorByDateChooser = ({ choosenResult, handleButtonClick }) => {
-  return (
-    <ButtonGroup>
-      <Button
-        variant={choosenResult === "result1" ? "primary" : "secondary"}
-        onClick={() => handleButtonClick("result1")}
-      >
-        Show Result of First Date
-      </Button>
-      <Button
-        variant={choosenResult === "result2" ? "primary" : "secondary"}
-        onClick={() => handleButtonClick("result2")}
-      >
-        Show Result of Second Date
-      </Button>
-    </ButtonGroup>
-  );
-};
 const DnsCountyLineChart = ({ initial_country_code, initial_date }) => {
   const [state, setState] = useState({
     data: [],
@@ -178,9 +154,7 @@ const DnsCountyLineChart = ({ initial_country_code, initial_date }) => {
       }}
     >
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart
-          data={state.data}
-        >
+        <LineChart data={state.data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
           <YAxis />
@@ -284,14 +258,45 @@ function DnsCountryGraph({
   );
 }
 
-function DnsGraphComponent() {
-  const [content, setContent] = useState("");
+function DnsGraphComponent({ changeMode, selectCountry, setCountryChartDate }) {
+  const [tooltip_content, setTooltipContent] = useState("");
   return (
     <React.Fragment>
-      <DnsGraphController setTooltipContent={setContent} />
-      <Tooltip anchorSelect="#map" content={content} float />
+      <DnsGraphController
+        setTooltipContent={setTooltipContent}
+        changeMode={changeMode}
+        setCountryCode={selectCountry}
+        setCountryChartDate={setCountryChartDate}
+      />
+      <Tooltip anchorSelect="#map" content={tooltip_content} float />
     </React.Fragment>
   );
 }
+const DnsPageController = () => {
+  const [mode, changeMode] = useState("whole_world");
+  const [country_code, setCountryCode] = useState("");
+  const [country_chart_date, setCountryChartDate] = useState(
+    get_current_date()
+  );
+  const renderContent = () => {
+    if (mode == "whole_world") {
+      return (
+        <DnsGraphComponent
+          changeMode={changeMode}
+          selectCountry={setCountryCode}
+          setCountryChartDate={setCountryChartDate}
+        />
+      );
+    } else if (mode == "selected_countries") {
+      return (
+        <DnsCountyLineChart
+          initial_country_code={country_code}
+          initial_date={country_chart_date}
+        />
+      );
+    }
+  };
+  return renderContent();
+};
 
-export default DnsGraphComponent;
+export default DnsPageController;
