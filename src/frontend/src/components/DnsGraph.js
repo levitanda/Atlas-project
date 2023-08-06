@@ -67,12 +67,7 @@ const DnsGraphController = memo(({ setTooltipContent }) => {
   const [data, setData] = useState(defaultResult);
   const [date, setDates] = useState(get_current_date());
   const [isLoading, setIsLoading] = useState(true);
-  const [choosenResult, setSelectedButton] = useState("result");
-
-  const handleButtonClick = (button) => {
-    setSelectedButton(button);
-  };
-  const choosenData = data[`${choosenResult}`];
+  
   const [mode, changeMode] = useState("whole_world");
   const [country_code, setCountryCode] = useState();
   // const [mode, changemode] = useState("selected_countries");
