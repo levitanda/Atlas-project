@@ -5,6 +5,7 @@ from .utils import (
     prepare_results_for_frontend,
     dns_between_dates,
 )
+from .dns_countries_data import countries_data
 
 
 def dns_data(request, date):
@@ -13,6 +14,7 @@ def dns_data(request, date):
 
 
 def dns_data_line(request, start_date, end_date):
+    # return JsonResponse({"data": countries_data})
     return JsonResponse({"data": dns_between_dates(start_date, end_date)})
 
 
