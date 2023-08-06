@@ -20,16 +20,12 @@ import {
   ButtonGroup,
 } from "react-bootstrap";
 import { scaleLinear } from "d3-scale";
-import {
-  get_current_date,
-} from "./IpV6component.js";
+import { get_current_date } from "./IpV6component.js";
 
 const DateTimeForm = ({ updateDatesFunction, defaultDate }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
-    updateDatesFunction(
-      event.target.date1.value
-    );
+    updateDatesFunction(event.target.date1.value);
   };
 
   return (
@@ -67,24 +63,19 @@ const DnsGraphController = memo(({ setTooltipContent }) => {
     setSelectedButton(button);
   };
   const choosenData = data[`${choosenResult}`];
-  const [mode, changemode] = useState("whole_world");
+  const [mode, changeMode] = useState("whole_world");
   // const [mode, changemode] = useState("selected_countries");
   const renderContent = () => {
     if (mode == "whole_world") {
       return (
-        <DnsCountryGraph data={data} setTooltipContent={setTooltipContent} />
-      );
-    } else if (mode == "selected_countries") {
-      return (
-        <Container
-          style={{
-            marginTop: "10px",
-            height: "75vh",
-            border: "1px solid black",
-            borderRadius: "10px",
-          }}
+        <DnsCountryGraph
+          data={data}
+          setTooltipContent={setTooltipContent}
+          changeModeHandler={changeMode}
         />
       );
+    } else if (mode == "selected_countries") {
+      return <DnsCountyLineChart />;
     }
   };
   useEffect(() => {
@@ -134,8 +125,19 @@ const ColorByDateChooser = ({ choosenResult, handleButtonClick }) => {
     </ButtonGroup>
   );
 };
-
-function DnsCountryGraph({ data, setTooltipContent }) {
+const DnsCountyLineChart = ({}) => {
+  return (
+    <Container
+      style={{
+        marginTop: "10px",
+        height: "75vh",
+        border: "1px solid black",
+        borderRadius: "10px",
+      }}
+    />
+  );
+};
+function DnsCountryGraph({ data, setTooltipContent, changeModeHandler }) {
   const colorScale = scaleLinear()
     .domain([data["min"], data["average"], data["max"]])
     .range(["green", "yellow", "red"]);
@@ -181,6 +183,10 @@ function DnsCountryGraph({ data, setTooltipContent }) {
                   const dns_result_with_unit =
                     dns_result != "NA" ? `${dns_result} ms` : dns_result;
                   setTooltipContent(`${name}: \n${dns_result_with_unit}`);
+                }}
+                onClick={() => {
+                  changeModeHandler("selected_countries");
+                  setTooltipContent("");
                 }}
                 onMouseLeave={() => {
                   setTooltipContent("");
