@@ -13,12 +13,11 @@ import { Container, Row, Form, Button, Col, Spinner } from "react-bootstrap";
 import countryList from "react-select-country-list";
 
 export const get_current_date = () => new Date().toISOString().split("T")[0];
-export const get_one_month_ago_from_today_date = () => {
+export const get_n_days_ago_from_current_date = (n) => {
   let date = new Date();
-  date.setMonth(date.getMonth() - 1);
+  date.setDate(date.getDate() - n);
   return date.toISOString().split("T")[0];
 };
-
 
 const DateTimeCountryForm = ({ updateData, initialData }) => {
   const handleSubmit = (event) => {
@@ -115,7 +114,7 @@ const IpV6Controller = () => {
 
   const computeInitialData = () => {
     return {
-      date1: get_one_month_ago_from_today_date(),
+      date1: get_n_days_ago_from_current_date(30),
       date2: get_current_date(),
       country: "IL",
     };
