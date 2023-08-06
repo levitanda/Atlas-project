@@ -17,7 +17,7 @@ import { scaleLinear } from "d3-scale";
 import {
   LoadingSpinner,
   get_current_date,
-  get_n_days_ago_from_current_date,
+  get_n_days_ago_from_given_date,
 } from "./IpV6component.js";
 import {
   LineChart,
@@ -135,7 +135,7 @@ const DnsCountyLineChart = ({
 
   const [state, setState] = useState({
     data: [],
-    startDate: get_n_days_ago_from_current_date(2),
+    startDate: get_n_days_ago_from_given_date(initial_date, 2),
     endDate: initial_date,
     // startDate: "2018-12-31",
     // endDate: "2023-01-02",
@@ -269,7 +269,7 @@ function DatesCountryForm({
           alert("Start date cannot be after end date!");
           return;
         }
-        
+
         updateDates(event.target.start_date.value, event.target.end_date.value);
       }}
     >

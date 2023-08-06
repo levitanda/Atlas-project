@@ -18,6 +18,12 @@ export const get_n_days_ago_from_current_date = (n) => {
   date.setDate(date.getDate() - n);
   return date.toISOString().split("T")[0];
 };
+export const get_n_days_ago_from_given_date = (date, n) => {
+  // date in the format of YYYY-MM-DD
+  let date_obj = new Date(date);
+  date_obj.setDate(date_obj.getDate() - n);
+  return date_obj.toISOString().split("T")[0];
+};
 
 const DateTimeCountryForm = ({ updateData, initialData }) => {
   const handleSubmit = (event) => {
