@@ -173,6 +173,7 @@ const DnsCountyLineChart = ({ initial_country_code, initial_date }) => {
               <Legend />
               {state.countries.map((country) => (
                 <Line
+                  key={country.value}
                   type="monotone"
                   dataKey={country.value}
                   stroke="#8884d8"
@@ -194,12 +195,12 @@ const DnsCountyLineChart = ({ initial_country_code, initial_date }) => {
   );
 };
 
-function DatesCountryForm(
+function DatesCountryForm({
   updateDates,
   updateSelectedCountries,
   state,
-  geo_options
-) {
+  geo_options,
+}) {
   return (
     <Form
       onSubmit={(event) => {
