@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, memo } from "react";
+import { interpolateRgb } from "d3-interpolate";
 import {
   ZoomableGroup,
   ComposableMap,
@@ -116,6 +117,7 @@ const DnsCountyLineChart = ({ initial_country_code, initial_date }) => {
       }),
     []
   );
+
   const [state, setState] = useState({
     data: [],
     isLoading: true,
@@ -152,6 +154,15 @@ const DnsCountyLineChart = ({ initial_country_code, initial_date }) => {
     };
     fetchData();
   }, [state.startDate, state.endDate]);
+  const colorScale = scaleLinear()
+    .domain([0, state.countries.length])
+    .range(["red", "blue"])
+    .interpolate(interpolateRgb);
+
+  // Generate 10 contrast colors
+  const colors = Array.from({ length: state.countries.length }, (_, i) =>
+    colorScale(i)
+  );
 
   return (
     <Container>
@@ -171,12 +182,13 @@ const DnsCountyLineChart = ({ initial_country_code, initial_date }) => {
               <YAxis />
               <ChartTooltip />
               <Legend />
-              {state.countries.map((country) => (
+              {state.countries.map((country, index) => (
                 <Line
                   key={country.value}
                   type="monotone"
                   dataKey={country.value}
-                  stroke="#8884d8"
+                  // stroke="#8884d8"
+                  stroke={colors[index]}
                   activeDot={{ r: 8 }}
                 />
               ))}
