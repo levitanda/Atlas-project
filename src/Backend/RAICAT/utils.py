@@ -326,11 +326,6 @@ def check_probes_asn_support(
     return result
 
 
-def add_results_ipv6(data, day, percentage):
-    if percentage != 0:
-        data.append({"name": day, "ipv6": percentage})
-    return data
-
 
 def compute_distinct_asn_ids_per_type(
     probes_asn_status_by_date: List[Dict[str, Union[str, int]]]
@@ -402,7 +397,22 @@ def compute_percentage_per_date(
     return {"name": date, "ip_v6": f"{percentage:.2f}"}
 
 
-def compute_ipv6_percentage(country_code, start_date, finish_date):
+
+
+def compute_ipv6_percentage(
+    country_code: str, start_date: str, finish_date: str
+) -> List[Dict[str, Union[str, float]]]:
+    """
+    Computes the percentage of IPv6 addresses for a given country and date range.
+
+    Args:
+        country_code (str): The country code for which to compute the percentage.
+        start_date (str): The start date of the date range.
+        finish_date (str): The end date of the date range.
+
+    Returns:
+        List[Dict[str, Union[str, float]]]: A list of dictionaries containing the name of the date and the percentage of IPv6 addresses.
+    """
     probe_ids_by_country = [
         probe["id"]
         for probe in probes_data
