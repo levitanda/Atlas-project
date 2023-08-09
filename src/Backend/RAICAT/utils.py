@@ -83,23 +83,6 @@ def convert_to_timestamp(date_str: str, delta_days: int = 0) -> int:
     return int(dt_object.timestamp())
 
 
-def get_probes_ids_list_by_country(country: str) -> List[str]:
-    """
-    Given a country code, returns a list of probe IDs for that country.
-
-    Args:
-        country (str): A two-letter country code.
-
-    Returns:
-        List[str]: A list of probe IDs for the given country.
-    """
-    return [
-        str(item["id"])
-        for item in probes_data
-        if item["country_code"] == country
-    ]
-
-
 def check_dns_measurements(
     date,
 ):
