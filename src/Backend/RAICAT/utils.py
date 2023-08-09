@@ -323,19 +323,20 @@ def add_results_ipv6(data, day, percentage):
 
 
 def check_as_for_probes(country_code, start_date, finish_date):
-    start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
-    end_datetime = datetime.strptime(finish_date, "%Y-%m-%d")
-    delta = end_datetime - start_datetime
+
     ids = [
         item["id"]
         for item in probes_data
         if item["country_code"] == country_code
     ]
-    results = probes_ipv6_check(ids, start_date, finish_date)
+    results = probes_ipv6_check(
+        ids,
+        start_date,
+        finish_date,
+    )
     data = []
-    for i in range(delta.days + 1):
-        current_date = start_datetime + timedelta(days=i)
-        current_day = current_date.strftime("%Y%m%d")
+
+    for date in compute_date_range(start_date, finish_date):
         as_version_6 = set()
         as_version_4 = set()
         for res in results:
