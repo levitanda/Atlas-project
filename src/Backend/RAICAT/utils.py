@@ -4,9 +4,6 @@ from ripe.atlas.cousteau import AtlasRequest
 from ripe.atlas.sagan import Result, DnsResult
 import pydash as _
 import pycountry
-from ipwhois import IPWhois
-from .probes_db import probes_data
-import concurrent.futures
 from .probes_db import probes_data
 
 
@@ -233,12 +230,16 @@ def add_results_ipv6(data, day, percentage):
 
 
 def check_as_for_probes(country_code, start_date, finish_date):
-    #probes = get_probes_for_country(country_code)
+    # probes = get_probes_for_country(country_code)
     start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
     end_datetime = datetime.strptime(finish_date, "%Y-%m-%d")
     delta = end_datetime - start_datetime
-    #ids = [item["id"] for item in probes]
-    ids = [item["id"] for item in probes_data if item["country_code"] == country_code]
+    # ids = [item["id"] for item in probes]
+    ids = [
+        item["id"]
+        for item in probes_data
+        if item["country_code"] == country_code
+    ]
     results = probes_ipv6_check(ids, start_date, finish_date)
     data = []
     for i in range(delta.days + 1):
