@@ -277,7 +277,7 @@ def compute_dns_between_dates(
 # IPv6 functions
 
 
-def check_probes_asn_support(
+def check_probes_asn_version_support(
     probe_ids: List[int], start_date: str, end_date: str
 ) -> List[Dict[str, Union[str, int]]]:
     """
@@ -324,7 +324,6 @@ def check_probes_asn_support(
             )
 
     return result
-
 
 
 def compute_distinct_asn_ids_per_type(
@@ -397,8 +396,6 @@ def compute_percentage_per_date(
     return {"name": date, "ip_v6": f"{percentage:.2f}"}
 
 
-
-
 def compute_ipv6_percentage(
     country_code: str, start_date: str, finish_date: str
 ) -> List[Dict[str, Union[str, float]]]:
@@ -418,7 +415,7 @@ def compute_ipv6_percentage(
         for probe in probes_data
         if probe["country_code"] == country_code
     ]
-    probes_status = check_probes_asn_support(
+    probes_status = check_probes_asn_version_support(
         probe_ids_by_country,
         start_date,
         finish_date,
