@@ -280,8 +280,28 @@ def compute_dns_between_dates(
 # IPv6 functions
 
 
-def probes_ipv6_check(probe, start_date, finish_date):
-    filters = {
+def probes_ipv6_check(
+    probes_id: List[int], start_date: str, end_date: str
+) -> List[Dict[str, Union[str, int]]]:
+    """
+    Given a list of probe ids, start date and end date, returns a list of dictionaries containing the ASN and date for each probe.
+
+    Args:
+    probes_id (List[int]): A list of probe ids.
+    start_date (str): The start date in the format "YYYY-MM-DD".
+    end_date (str): The end date in the format "YYYY-MM-DD".
+
+    Returns:
+    List[Dict[str, Union[str, int]]]: A list of dictionaries containing the ASN and date for each probe.
+    """
+    url_path = "/api/v2/probes/archive"
+    change_timestamp_format = lambda date: datetime.strptime(
+        date, "%Y%m%d"
+    ).strftime("%Y-%m-%d")
+    result = []
+    for probe_ids_sublist in _.chunk(probes_id, 500):
+        # split the list of probe ids into sublists of 500 probe ids
+        filters = {
         "probe": probe,
         "date__gte": start_date,
         "date__lte": finish_date,
