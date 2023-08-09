@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional
 from ripe.atlas.cousteau import AtlasRequest
 from ripe.atlas.sagan import Result, DnsResult
 import pydash as _
@@ -83,14 +83,24 @@ def convert_to_timestamp(date_str: str, delta_days: int = 0) -> int:
     return int(dt_object.timestamp())
 
 
+def compute_country_code_by_probe_id_dict() -> Dict[int, Optional[str]]:
+    """
+    Computes a dictionary of probe IDs and their corresponding country codes.
+
+    Returns:
+        Dict[int, Optional[str]]: A dictionary of probe IDs and their corresponding country codes.
+    """
+    return {
+        probe["id"]: probe["country_code"]
+        for probe in probes_data
+        if probe["country_code"] is not None
+    }
+
+
 def check_dns_measurements(
     date,
 ):
-    country_by_probe_id = {
-        probe["id"]: probe["country_code"]
-        for probe in probes_data
-        if probe["country_code"] != None
-    }
+    country_code_by_probe_id_hash = compute_country_code_by_probe_id_dict()
     params = {
         "start": convert_to_timestamp(date),
         # start date of measurements as unix timestamp
@@ -125,7 +135,7 @@ def check_dns_measurements(
                     ]
                 ),
                 "country_code": convert_two_letter_to_three_letter_code(
-                    country_by_probe_id.get(key)
+                    country_code_by_probe_id_hash.get(key)
                 ),
             }
         )
@@ -236,11 +246,9 @@ def add_results_ipv6(data, day, percentage):
 
 
 def check_as_for_probes(country_code, start_date, finish_date):
-    # probes = get_probes_for_country(country_code)
     start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
     end_datetime = datetime.strptime(finish_date, "%Y-%m-%d")
     delta = end_datetime - start_datetime
-    # ids = [item["id"] for item in probes]
     ids = [
         item["id"]
         for item in probes_data
@@ -250,7 +258,6 @@ def check_as_for_probes(country_code, start_date, finish_date):
     data = []
     for i in range(delta.days + 1):
         current_date = start_datetime + timedelta(days=i)
-        # date_obj = datetime.strptime(current_date, "%Y%m%d")
         current_day = current_date.strftime("%Y%m%d")
         as_version_6 = set()
         as_version_4 = set()
