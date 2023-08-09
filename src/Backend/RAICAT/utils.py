@@ -47,46 +47,6 @@ def convert_two_letter_to_three_letter_code(
         return None
 
 
-def compute_average_by_country(
-    results: List[Dict],
-) -> Dict[Union[str, None], float]:
-    """
-    Given a list of results, computes the average RTT by country.
-
-    Args:
-        results (List[Dict]): A list of results.
-
-    Returns:
-        Dict[Union[str, None], float]: A dictionary mapping country codes to average RTT values.
-    """
-    result_by_country = (
-        _.chain(
-            _.group_by(
-                [
-                    {
-                        "rtt_result": compute_average(
-                            [res for res in result["rtt_results"] if res]
-                        ),
-                        "country": result["geolocation"]["country_code"],
-                    }
-                    for result in results
-                ],
-                "country",
-            )
-        )
-        .map_keys(
-            lambda value, key: convert_two_letter_to_three_letter_code(key)
-        )
-        .map_values(
-            lambda results, key: compute_average(
-                [item["rtt_result"] for item in results if item["rtt_result"]]
-            )
-        )
-        .value()
-    )
-    return result_by_country
-
-
 def prepare_results_for_frontend(
     results: Dict[str, float]
 ) -> Dict[str, Union[List[float], float]]:
