@@ -158,23 +158,15 @@ def check_dns_measurements(
         )
         # select only relevant fields from response
         .group_by("probe_id")
-        # group all the result
-        .map_values(
-            lambda value, key: {
-                "rtt_result": compute_average(
-                    [
-                        item["rtt_results"]
-                        for item in value
-                        if item["rtt_results"] != NO_RTT_RESULT
-                    ]
-                ),
-                "country_code": convert_two_letter_to_three_letter_code(
-                    country_code_by_probe_id_hash.get(key)
-                ),
-            }
+        # group all the result by probe id
+        .map(
+            lambda values, key: compute_average_rtt_and_country_code(
+                country_code_by_probe_id_hash,
+                probe_id=key,
+                rtt_results_of_probe=values,
+            )
         )
         # we compute average rtt for each probe and its 3-letter country code
-        .values()
         .group_by("country_code")
         .map_values(
             lambda value: compute_average(
@@ -188,6 +180,41 @@ def check_dns_measurements(
     )
 
     return results
+
+
+def compute_average_rtt_and_country_code(
+    country_code_by_probe_id_hash: Dict[int, str],
+    probe_id: int,
+    rtt_results_of_probe: List[Dict[str, Union[int, float]]],
+) -> Dict[str, Union[float, str]]:
+    """
+    Given a dictionary of country codes by probe ID, a probe ID, and a list of RTT results for that probe,
+    computes the average RTT and the 3-letter country code for that probe.
+
+    Args:
+    country_code_by_probe_id_hash (Dict[int, str]): A dictionary of country codes by probe ID.
+    probe_id (int): The ID of the probe.
+    rtt_results_of_probe (List[Dict[str, Union[int, float]]]): A list of RTT results for the probe.
+
+    Returns:
+    Dict[str, Union[float, str]]: A dictionary containing the average RTT and the 3-letter country code for the probe.
+    """
+    # Compute the average RTT for the probe, ignoring any results that are equal to NO_RTT_RESULT
+    average_rtt = compute_average(
+        [
+            result["rtt_results"]
+            for result in rtt_results_of_probe
+            if result["rtt_results"] != NO_RTT_RESULT
+        ]
+    )
+
+    # Get the 3-letter country code for the probe
+    country_code = convert_two_letter_to_three_letter_code(
+        country_code_by_probe_id_hash.get(probe_id)
+    )
+
+    # Return a dictionary containing the average RTT and the 3-letter country code for the probe
+    return {"rtt_result": average_rtt, "country_code": country_code}
 
 
 def compute_date_range(start_date: str, end_date: str) -> List[str]:
