@@ -97,10 +97,16 @@ def compute_country_code_by_probe_id_dict() -> Dict[int, Optional[str]]:
     }
 
 
-def check_dns_measurements(
-    date,
-):
-    country_code_by_probe_id_hash = compute_country_code_by_probe_id_dict()
+def get_dns_ripe_atlas_measurement_for_date(date: str) -> dict:
+    """
+    Given a date in string format, returns the results of a DNS measurement done by RIPE Atlas on that date.
+
+    Args:
+    date (str): The date in the format "YYYY-MM-DD".
+
+    Returns:
+    dict: The results of the DNS measurement in API format.
+    """
     params = {
         "start": convert_to_timestamp(date),
         # start date of measurements as unix timestamp
@@ -112,6 +118,15 @@ def check_dns_measurements(
     is_success, response_results = AtlasRequest(**{"url_path": url_path}).get(
         **params
     )
+
+    return response_results
+
+
+def check_dns_measurements(
+    date,
+):
+    country_code_by_probe_id_hash = compute_country_code_by_probe_id_dict()
+    response_results = get_dns_ripe_atlas_measurement_for_date(date)
     results = (
         _.chain(response_results)
         .map(
