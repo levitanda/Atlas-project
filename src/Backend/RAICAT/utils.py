@@ -315,14 +315,14 @@ def compute_dns_between_dates(
 # IPv6 functions
 
 
-def probes_ipv6_check(
-    probes_id: List[int], start_date: str, end_date: str
+def check_probes_asn_support(
+    probe_ids: List[int], start_date: str, end_date: str
 ) -> List[Dict[str, Union[str, int]]]:
     """
     Given a list of probe ids, start date and end date, returns a list of dictionaries containing the ASN and date for each probe.
 
     Args:
-    probes_id (List[int]): A list of probe ids.
+    probe_ids (List[int]): A list of probe ids.
     start_date (str): The start date in the format "YYYY-MM-DD".
     end_date (str): The end date in the format "YYYY-MM-DD".
 
@@ -334,41 +334,29 @@ def probes_ipv6_check(
         date, "%Y%m%d"
     ).strftime("%Y-%m-%d")
     result = []
-    for probe_ids_sublist in _.chunk(probes_id, 500):
+    for probe_ids_sublist in _.chunk(probe_ids, 500):
         # split the list of probe ids into sublists of 500 probe ids
         filters = {
-        "probe": probe,
-        "date__gte": start_date,
-        "date__lte": finish_date,
-    }
-    url_path = "/api/v2/probes/archive"
-    is_success, response = AtlasRequest(**{"url_path": url_path}).get(
-        **filters
-    )
-    if is_success:
-        return [
-            {
-                "id": result["id"],
-                "asn_v6": result["asn_v6"],
-                "asn_v4": result["asn_v4"],
-                "date": result["date"],
-            }
-            for result in response["results"]
-        ]
-    else:
-        return None
+            "probe": probe_ids_sublist,
+            "date__gte": start_date,
+            "date__lte": end_date,
+        }
+        is_success, response = AtlasRequest(**{"url_path": url_path}).get(
+            **filters
+        )
+        if is_success:
+            result.extend(
+                [
+                    {
+                        "asn_v6": result["asn_v6"],
+                        "asn_v4": result["asn_v4"],
+                        "date": change_timestamp_format(result["date"]),
+                    }
+                    for result in response["results"]
+                ]
+            )
 
-
-def get_probes_for_country(country_code):
-    filters = {"country_code": country_code}
-    url_path = "/api/v2/probes/"
-    is_success, response = AtlasRequest(**{"url_path": url_path}).get(
-        **filters
-    )
-    if is_success:
-        return response["results"]
-    else:
-        return None
+    return result
 
 
 def add_results_ipv6(data, day, percentage):
