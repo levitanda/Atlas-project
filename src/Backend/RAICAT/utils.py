@@ -9,6 +9,8 @@ from .probes_db import probes_data
 
 STOPPED: int = 4
 
+NO_RTT_RESULT: int = -1
+
 
 def compute_average(x: List[float]) -> float:
     """
@@ -122,6 +124,26 @@ def get_dns_ripe_atlas_measurement_for_date(date: str) -> dict:
     return response_results
 
 
+def select_relevant_attributes_from_ripe_atlas_response(
+    dns_api_result_per_probe: Dict[str, any],
+) -> Dict[str, any]:
+    """
+    Given a dictionary of DNS API result per probe, returns a dictionary containing only the relevant attributes.
+    in case if there is no result ( error during request), set default NO_RTT_RESULT = -1 value
+    Args:
+        dns_api_result_per_probe (Dict[str, any]): A dictionary of DNS API result per probe.
+
+    Returns:
+        Dict[str, any]: A dictionary containing only the relevant attributes.
+    """
+    return {
+        "probe_id": dns_api_result_per_probe["prb_id"],
+        "rtt_results": dns_api_result_per_probe.get("result", {}).get(
+            "rt", NO_RTT_RESULT
+        ),
+    }
+
+
 def check_dns_measurements(
     date,
 ):
@@ -130,23 +152,20 @@ def check_dns_measurements(
     results = (
         _.chain(response_results)
         .map(
-            lambda probe_dns_result: {
-                "probe_id": probe_dns_result["prb_id"],
-                "rtt_results": probe_dns_result.get("result", {}).get(
-                    "rt", -1
-                ),
-            }
+            lambda api_result: select_relevant_attributes_from_ripe_atlas_response(
+                dns_api_result_per_probe=api_result
+            )
         )
         # select only relevant fields from response
-        # in case if there is no result ( error during request), set rtt_result to -1
         .group_by("probe_id")
+        # group all the result
         .map_values(
             lambda value, key: {
                 "rtt_result": compute_average(
                     [
                         item["rtt_results"]
                         for item in value
-                        if item["rtt_results"] != (-1)
+                        if item["rtt_results"] != NO_RTT_RESULT
                     ]
                 ),
                 "country_code": convert_two_letter_to_three_letter_code(
