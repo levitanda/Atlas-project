@@ -119,7 +119,7 @@ const DnsGraphController = memo(
   }
 );
 
-const DnsCountyLineChart = ({
+const DnsCountryLineChartController = ({
   initial_country_code,
   initial_date,
   changeMode,
@@ -137,8 +137,9 @@ const DnsCountyLineChart = ({
     data: [],
     startDate: get_n_days_ago_from_given_date(initial_date, 2),
     endDate: initial_date,
-    // startDate: "2018-12-31",
-    // endDate: "2023-01-02",
+    // startDate: "2019-09-01",
+    // endDate: "2020-07-01",
+    // endDate: "2021-07-01",
     countries: [geo_options.find((item) => item.value == initial_country_code)],
   });
   const setIsLoadingState = (loadingState) => {
@@ -174,7 +175,7 @@ const DnsCountyLineChart = ({
       {!state.isLoading ? (
         <React.Fragment>
           <Row>
-            <DnsLineChartGraphBody
+            <LineChartGraphBody
               state={state}
               changeMode={changeMode}
               setCountryChartDate={setCountryChartDate}
@@ -194,7 +195,11 @@ const DnsCountyLineChart = ({
   );
 };
 
-function DnsLineChartGraphBody({ state, changeMode, setCountryChartDate }) {
+export function LineChartGraphBody({
+  state,
+  changeMode = (item) => {},
+  setCountryChartDate = (item) => {},
+}) {
   const colorScale = scaleLinear()
     .domain([0, state.countries.length])
     .range(["red", "blue"])
@@ -242,7 +247,7 @@ function DnsLineChartGraphBody({ state, changeMode, setCountryChartDate }) {
   );
 }
 
-function DatesCountryForm({
+export function DatesCountryForm({
   updateDates,
   updateSelectedCountries,
   state,
@@ -289,6 +294,7 @@ function DatesCountryForm({
             }}
             value={state.countries}
             options={geo_options}
+            // isDisabled={}
           />
         </Form.Group>
         <Form.Group as={Col} md={3} controlId="start_date">
@@ -433,7 +439,7 @@ const DnsPageController = () => {
       );
     } else if (mode === "selected_countries") {
       return (
-        <DnsCountyLineChart
+        <DnsCountryLineChartController
           initial_country_code={country_code}
           setCountryChartDate={setCountryChartDate}
           initial_date={country_chart_date}
