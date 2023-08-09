@@ -144,6 +144,41 @@ def select_relevant_attributes_from_ripe_atlas_response(
     }
 
 
+def compute_average_rtt_and_country_code(
+    country_code_by_probe_id_hash: Dict[int, str],
+    probe_id: int,
+    rtt_results_of_probe: List[Dict[str, Union[int, float]]],
+) -> Dict[str, Union[float, str]]:
+    """
+    Given a dictionary of country codes by probe ID, a probe ID, and a list of RTT results for that probe,
+    computes the average RTT and the 3-letter country code for that probe.
+
+    Args:
+    country_code_by_probe_id_hash (Dict[int, str]): A dictionary of country codes by probe ID.
+    probe_id (int): The ID of the probe.
+    rtt_results_of_probe (List[Dict[str, Union[int, float]]]): A list of RTT results for the probe.
+
+    Returns:
+    Dict[str, Union[float, str]]: A dictionary containing the average RTT and the 3-letter country code for the probe.
+    """
+    # Compute the average RTT for the probe, ignoring any results that are equal to NO_RTT_RESULT
+    average_rtt = compute_average(
+        [
+            result["rtt_results"]
+            for result in rtt_results_of_probe
+            if result["rtt_results"] != NO_RTT_RESULT
+        ]
+    )
+
+    # Get the 3-letter country code for the probe
+    country_code = convert_two_letter_to_three_letter_code(
+        country_code_by_probe_id_hash.get(probe_id)
+    )
+
+    # Return a dictionary containing the average RTT and the 3-letter country code for the probe
+    return {"rtt_result": average_rtt, "country_code": country_code}
+
+
 def check_dns_measurements(date: str) -> Dict[str, Union[List[float], float]]:
     """
     Given a date in string format, retrieves the results of a DNS measurement done by RIPE Atlas on that date,
