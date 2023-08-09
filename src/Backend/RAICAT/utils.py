@@ -144,12 +144,27 @@ def select_relevant_attributes_from_ripe_atlas_response(
     }
 
 
+def check_dns_measurements(date: str) -> Dict[str, Union[List[float], float]]:
+    """
+    Given a date in string format, retrieves the results of a DNS measurement done by RIPE Atlas on that date,
+    computes the average RTT and the 3-letter country code for each probe, and returns the average RTT for each country.
+
+    Args:
+        date (str): The date in the format "YYYY-MM-DD".
+
+    Returns:
+        Dict[str, Union[List[float], float]]: A dictionary containing the average RTT for each country.
+    """
 def check_dns_measurements(
-    date,
-):
-    country_code_by_probe_id_hash = compute_country_code_by_probe_id_dict()
-    response_results = get_dns_ripe_atlas_measurement_for_date(date)
-    results = (
+    date: str,
+) -> Dict[str, Union[List[float], float]]:
+    country_code_by_probe_id_hash: Dict[
+        int, Optional[str]
+    ] = compute_country_code_by_probe_id_dict()
+
+    response_results: dict = get_dns_ripe_atlas_measurement_for_date(date)
+
+    results: Dict[str, Union[List[float], float]] = (
         _.chain(response_results)
         .map(
             lambda api_result: select_relevant_attributes_from_ripe_atlas_response(
@@ -167,6 +182,7 @@ def check_dns_measurements(
             )
         )
         # we compute average rtt for each probe and its 3-letter country code
+        # and remove its connection to the probe id
         .group_by("country_code")
         .map_values(
             lambda value: compute_average(
