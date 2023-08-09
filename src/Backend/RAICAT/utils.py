@@ -340,7 +340,7 @@ def check_as_for_probes(country_code, start_date, finish_date):
         as_version_6 = set()
         as_version_4 = set()
         for res in results:
-            if res["date"] == current_day:
+            if res["date"] == date:
                 if res["asn_v6"] == None:
                     as_version_4.add(res["asn_v4"])
                 else:
@@ -355,7 +355,5 @@ def check_as_for_probes(country_code, start_date, finish_date):
             else 0
         )
         # ! TODO fix default value
-        # print(f"At date {current_day} the percentage of IPv6 ASes in {country_code} is: {percentage}%")
-        current_day = current_date.strftime("%Y-%m-%d")
-        data = add_results_ipv6(data, current_day, f"{percentage:.2f}")
+        data = add_results_ipv6(data, date, f"{percentage:.2f}")
     return data
