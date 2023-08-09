@@ -190,9 +190,6 @@ def check_dns_measurements(date: str) -> Dict[str, Union[List[float], float]]:
     Returns:
         Dict[str, Union[List[float], float]]: A dictionary containing the average RTT for each country.
     """
-def check_dns_measurements(
-    date: str,
-) -> Dict[str, Union[List[float], float]]:
     country_code_by_probe_id_hash: Dict[
         int, Optional[str]
     ] = compute_country_code_by_probe_id_dict()
@@ -363,6 +360,35 @@ def add_results_ipv6(data, day, percentage):
     if percentage != 0:
         data.append({"name": day, "ipv6": percentage})
     return data
+
+
+
+def compute_distinct_asn_ids_per_type(probes_asn_status_by_date: List[Dict[str, Union[str, int]]]) -> Dict[str, List[str]]:
+    """
+    Given a list of dictionaries containing the ASN and date for each probe, returns a dictionary containing the distinct ASN names for IPv4 and IPv6.
+
+    Args:
+    probes_asn_status_by_date (List[Dict[str, Union[str, int]]]): A list of dictionaries containing the ASN and date for each probe.
+
+    Returns:
+    Dict[str, List[str]]: A dictionary containing the distinct ASN names for IPv4 and IPv6.
+    """
+    return {
+        "distinct_asn_v4_names": _.chain(probes_asn_status_by_date)
+        .group_by("asn_v4")
+        .keys()
+        .value(),
+        "distinct_asn_v6_names": _.chain(probes_asn_status_by_date)
+        .group_by("asn_v6")
+        .keys()
+        .value(),
+    }
+
+
+
+
+
+
 
 
 def check_as_for_probes(country_code, start_date, finish_date):
