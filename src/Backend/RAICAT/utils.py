@@ -47,7 +47,18 @@ def convert_two_letter_to_three_letter_code(
         return None
 
 
-def compute_average_by_country(results):
+def compute_average_by_country(
+    results: List[Dict],
+) -> Dict[Union[str, None], float]:
+    """
+    Given a list of results, computes the average RTT by country.
+
+    Args:
+        results (List[Dict]): A list of results.
+
+    Returns:
+        Dict[Union[str, None], float]: A dictionary mapping country codes to average RTT values.
+    """
     result_by_country = (
         _.chain(
             _.group_by(
@@ -76,22 +87,52 @@ def compute_average_by_country(results):
     return result_by_country
 
 
-def prepare_results_for_frontend(results):
+def prepare_results_for_frontend(
+    results: Dict[str, float]
+) -> Dict[str, Union[List[float], float]]:
+    """
+    Given a dictionary of results, prepares the data for the frontend.
+
+    Args:
+        results (Dict[str, float]): A dictionary of results.
+
+    Returns:
+        Dict[str, Union[List[float], float]]: A dictionary containing the data, min, max, and average values.
+    """
     return {
         "data": results,
         "min": min(list(results.values()) + [0]),
         "max": max(list(results.values()) + [0]),
-        "average": compute_average(results.values()),
+        "average": compute_average(list(results.values())),
     }
 
 
-def convert_to_timestamp(date_str, delta_days=0):
+def convert_to_timestamp(date_str: str, delta_days: int = 0) -> int:
+    """
+    Converts a date string to a Unix timestamp.
+
+    Args:
+        date_str (str): A date string in the format of "YYYY-MM-DD".
+        delta_days (int): An optional number of days to add to the date.
+
+    Returns:
+        int: The Unix timestamp of the date string.
+    """
     dt_object = datetime.strptime(date_str, "%Y-%m-%d")
     dt_object += timedelta(days=delta_days)
     return int(dt_object.timestamp())
 
 
-def get_probes_ids_list_by_country(country):
+def get_probes_ids_list_by_country(country: str) -> List[str]:
+    """
+    Given a country code, returns a list of probe IDs for that country.
+
+    Args:
+        country (str): A two-letter country code.
+
+    Returns:
+        List[str]: A list of probe IDs for the given country.
+    """
     return [
         str(item["id"])
         for item in probes_data
@@ -162,7 +203,17 @@ def check_dns_measurements(
     return results
 
 
-def date_range(start_date, end_date):
+def compute_date_range(start_date: str, end_date: str) -> List[str]:
+    """
+    Given two dates in string format, returns a list of all dates in the range.
+
+    Args:
+    start_date (str): The start date in the format "YYYY-MM-DD".
+    end_date (str): The end date in the format "YYYY-MM-DD".
+
+    Returns:
+    List[str]: A list of all dates in the range in the format "YYYY-MM-DD".
+    """
     # Convert the input date strings into datetime objects
     start_date = datetime.strptime(start_date, "%Y-%m-%d")
     end_date = datetime.strptime(end_date, "%Y-%m-%d")
@@ -177,10 +228,22 @@ def date_range(start_date, end_date):
     return [date.strftime("%Y-%m-%d") for date in dates]
 
 
-def dns_between_dates(start_date, end_date):
+def compute_dns_between_dates(
+    start_date: str, end_date: str
+) -> List[Dict[str, Union[str, int]]]:
+    """
+    Given two dates in string format, returns a list of dictionaries containing DNS measurements for each date in the range.
+
+    Args:
+    start_date (str): The start date in the format "YYYY-MM-DD".
+    end_date (str): The end date in the format "YYYY-MM-DD".
+
+    Returns:
+    List[Dict[str, Union[str, int]]]: A list of dictionaries containing DNS measurements for each date in the range.
+    """
     return [
         {"name": date, **check_dns_measurements(date)}
-        for date in date_range(start_date, end_date)
+        for date in compute_date_range(start_date, end_date)
     ]
 
 
