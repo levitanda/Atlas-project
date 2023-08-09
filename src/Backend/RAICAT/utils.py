@@ -230,41 +230,6 @@ def check_dns_measurements(date: str) -> Dict[str, Union[List[float], float]]:
     return results
 
 
-def compute_average_rtt_and_country_code(
-    country_code_by_probe_id_hash: Dict[int, str],
-    probe_id: int,
-    rtt_results_of_probe: List[Dict[str, Union[int, float]]],
-) -> Dict[str, Union[float, str]]:
-    """
-    Given a dictionary of country codes by probe ID, a probe ID, and a list of RTT results for that probe,
-    computes the average RTT and the 3-letter country code for that probe.
-
-    Args:
-    country_code_by_probe_id_hash (Dict[int, str]): A dictionary of country codes by probe ID.
-    probe_id (int): The ID of the probe.
-    rtt_results_of_probe (List[Dict[str, Union[int, float]]]): A list of RTT results for the probe.
-
-    Returns:
-    Dict[str, Union[float, str]]: A dictionary containing the average RTT and the 3-letter country code for the probe.
-    """
-    # Compute the average RTT for the probe, ignoring any results that are equal to NO_RTT_RESULT
-    average_rtt = compute_average(
-        [
-            result["rtt_results"]
-            for result in rtt_results_of_probe
-            if result["rtt_results"] != NO_RTT_RESULT
-        ]
-    )
-
-    # Get the 3-letter country code for the probe
-    country_code = convert_two_letter_to_three_letter_code(
-        country_code_by_probe_id_hash.get(probe_id)
-    )
-
-    # Return a dictionary containing the average RTT and the 3-letter country code for the probe
-    return {"rtt_result": average_rtt, "country_code": country_code}
-
-
 def compute_date_range(start_date: str, end_date: str) -> List[str]:
     """
     Given two dates in string format, returns a list of all dates in the range.
@@ -333,6 +298,7 @@ def check_probes_asn_support(
     result = []
     for probe_ids_sublist in _.chunk(probe_ids, 500):
         # split the list of probe ids into sublists of 500 probe ids
+        # if we don't do this the request will fail because the url will be too long
         filters = {
             "probe": probe_ids_sublist,
             "date__gte": start_date,
@@ -350,6 +316,10 @@ def check_probes_asn_support(
                         "date": change_timestamp_format(result["date"]),
                     }
                     for result in response["results"]
+                    if (
+                        result["asn_v6"] is not None
+                        or result["asn_v4"] is not None
+                    )
                 ]
             )
 
@@ -362,8 +332,9 @@ def add_results_ipv6(data, day, percentage):
     return data
 
 
-
-def compute_distinct_asn_ids_per_type(probes_asn_status_by_date: List[Dict[str, Union[str, int]]]) -> Dict[str, List[str]]:
+def compute_distinct_asn_ids_per_type(
+    probes_asn_status_by_date: List[Dict[str, Union[str, int]]]
+) -> Dict[str, List[str]]:
     """
     Given a list of dictionaries containing the ASN and date for each probe, returns a dictionary containing the distinct ASN names for IPv4 and IPv6.
 
@@ -385,44 +356,89 @@ def compute_distinct_asn_ids_per_type(probes_asn_status_by_date: List[Dict[str, 
     }
 
 
+def compute_amount_of_asns(
+    grouped_asn_dict: Dict[str, List[str]]
+) -> Dict[str, int]:
+    """
+    Computes the amount of distinct ASN IDs for IPv4 and IPv6 from a dictionary of grouped ASN IDs.
+
+    Args:
+        grouped_asn_dict: A dictionary containing the distinct ASN IDs for IPv4 and IPv6.
+
+    Returns:
+        A dictionary containing the amount of distinct ASN IDs for IPv4 and IPv6, as well as the total amount of ASN IDs.
+    """
+    return {
+        "asn_amount": len(
+            _.union(
+                grouped_asn_dict["distinct_asn_v4_names"],
+                grouped_asn_dict["distinct_asn_v6_names"],
+            )
+        ),
+        "asn_v4_amount": len(grouped_asn_dict["distinct_asn_v4_names"]),
+        "asn_v6_amount": len(grouped_asn_dict["distinct_asn_v6_names"]),
+    }
 
 
+def compute_percentage_per_date(
+    msn_amounts: Dict[str, int], date: str
+) -> Dict[str, Union[str, float]]:
+    """
+    Computes the percentage of IPv6 addresses for a given date.
+
+    Args:
+        msn_amounts (Dict[str, int]): A dictionary containing the amount of distinct ASN IDs for IPv4 and IPv6, as well as the total amount of ASN IDs.
+        date (str): The date for which to compute the percentage.
+
+    Returns:
+        Dict[str, Union[str, float]]: A dictionary containing the name of the date and the percentage of IPv6 addresses.
+    """
+    percentage = (
+        ((msn_amounts["asn_v6_amount"] / msn_amounts["asn_amount"]) * 100)
+        if msn_amounts["asn_amount"] != 0
+        and msn_amounts["asn_v6_amount"] is not None
+        else 0
+    )
+    return {"name": date, "ip_v6": f"{percentage:.2f}"}
 
 
-
-
-def check_as_for_probes(country_code, start_date, finish_date):
-
-    ids = [
-        item["id"]
-        for item in probes_data
-        if item["country_code"] == country_code
+def compute_ipv6_percentage(country_code, start_date, finish_date):
+    probe_ids_by_country = [
+        probe["id"]
+        for probe in probes_data
+        if probe["country_code"] == country_code
     ]
-    results = probes_ipv6_check(
-        ids,
+    probes_status = check_probes_asn_support(
+        probe_ids_by_country,
         start_date,
         finish_date,
     )
-    data = []
-
-    for date in compute_date_range(start_date, finish_date):
-        as_version_6 = set()
-        as_version_4 = set()
-        for res in results:
-            if res["date"] == date:
-                if res["asn_v6"] == None:
-                    as_version_4.add(res["asn_v4"])
-                else:
-                    as_version_6.add(res["asn_v6"])
-        amount_as_ipv6 = len(as_version_6)
-        amount_as_ipv4 = len(as_version_4)
-        # print(amount_as_ipv4, "ipv4")
-        # print(amount_as_ipv6, "ipv6")
-        percentage = (
-            (amount_as_ipv6 / (amount_as_ipv6 + amount_as_ipv4)) * 100
-            if amount_as_ipv6 + amount_as_ipv4 != 0
-            else 0
+    result = (
+        _.chain(probes_status).group_by("date")
+        # group all the result by date
+        .map_values(
+            lambda probes_status_by_day, date: compute_distinct_asn_ids_per_type(
+                probes_asn_status_by_date=probes_status_by_day
+            )
         )
-        # ! TODO fix default value
-        data = add_results_ipv6(data, date, f"{percentage:.2f}")
-    return data
+        # for each date, compute the distinct asn ids for ipv4 and ipv6
+        # as a result per date we have a dictionary with the distinct asn ids for ipv4 and ipv6
+        # format of data :{"distinct_asn_v4_names": [...], "distinct_asn_v6_names": [...]}
+        .map_values(
+            lambda grouped_asn_per_type, date: compute_amount_of_asns(
+                grouped_asn_dict=grouped_asn_per_type
+            )
+        )
+        # for each date, compute the amount of distinct asn ids for ipv4 and ipv6 and their union (total amount)
+        # as a result per date we have a dictionary with format
+        # {"asn_amount": m+n - intersection, "asn_v4_amount": m  "asn_v6_amount": n}
+        .map(
+            lambda asn_amounts_per_date, date: compute_percentage_per_date(
+                msn_amounts=asn_amounts_per_date, date=date
+            )
+        )
+        # for each date, compute the percentage of probes that support ipv6
+        # as a result per date we have a dictionary with format {"name": date, "ipv6": percentage}
+        .value()
+    )
+    return result
