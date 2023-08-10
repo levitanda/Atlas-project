@@ -22,6 +22,8 @@ from .utils import (
     check_probes_asn_version_support,
     compute_distinct_asn_ids_per_type,
     compute_amount_of_asns,
+    compute_percentage_per_date,
+    compute_ipv6_percentage,
 )
 from .fixtures.dns_ripe_atlas_fixtures import (
     dns_ripe_atlas_measurements_per_2021_01_01_api_response_fixture,
@@ -277,3 +279,14 @@ class TestUtils(unittest.TestCase):
         msn_amounts = {"asn_amount": 4, "asn_v4_amount": 2, "asn_v6_amount": 2}
         result = compute_percentage_per_date(msn_amounts, "2022-01-01")
         self.assertEqual(result, {"name": "2022-01-01", "ip_v6": "50.00"})
+
+    def test_compute_ipv6_percentage(self):
+        # Define the expected result of the function
+        expected_result = [
+            {"name": "2020-01-01", "ip_v6": "41.53"},
+            {"name": "2020-01-02", "ip_v6": "41.34"},
+        ]
+        # Call the compute_ipv6_percentage function with the input data
+        result = compute_ipv6_percentage("US", "2020-01-01", "2020-01-02")
+        # Check that the result matches the expected result
+        self.assertEqual(result, expected_result)
