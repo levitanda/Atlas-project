@@ -113,6 +113,47 @@ class TestUtils(unittest.TestCase):
             expected_output_dict,
         )
 
+    def test_compute_average_rtt_and_country_code(self):
+        # Define test data
+        country_code_by_probe_id_hash = {1: "US", 2: "FR", 3: "JP"}
+        probe_id = 2
+        rtt_results_of_probe = [
+            {"rtt_results": 10.0},
+            {"rtt_results": 20.0},
+            {"rtt_results": NO_RTT_RESULT},
+            {"rtt_results": 30.0},
+        ]
+
+        # Mock the `compute_average` and `convert_two_letter_to_three_letter_code` functions
+        with mock.patch(
+            "RAICAT.utils.compute_average"
+        ) as mock_compute_average, mock.patch(
+            "RAICAT.utils.convert_two_letter_to_three_letter_code"
+        ) as mock_convert_two_letter_to_three_letter_code:
+            # Configure the mock `compute_average` function to return a fixed value
+            mock_compute_average.return_value = 20.0
+
+            # Configure the mock `convert_two_letter_to_three_letter_code` function to return a fixed value
+            mock_convert_two_letter_to_three_letter_code.return_value = "FRA"
+
+            # Call the function under test
+            result = compute_average_rtt_and_country_code(
+                country_code_by_probe_id_hash, probe_id, rtt_results_of_probe
+            )
+
+            # Assert the expected output
+            self.assertEqual(
+                result, {"rtt_result": 20.0, "country_code": "FRA"}
+            )
+
+            # Assert that the `compute_average` function was called with the expected arguments
+            mock_compute_average.assert_called_once_with([10.0, 20.0, 30.0])
+
+            # Assert that the `convert_two_letter_to_three_letter_code` function was called with the expected arguments
+            mock_convert_two_letter_to_three_letter_code.assert_called_once_with(
+                "FR"
+            )
+
     # def test_get_dns_ripe_atlas_measurement_for_date(self):
     #     expected_output = {"results": []}
     #     with patch("ripe.atlas.cousteau.AtlasRequest") as mock_request:
