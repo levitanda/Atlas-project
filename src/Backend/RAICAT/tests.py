@@ -256,3 +256,24 @@ class TestUtils(unittest.TestCase):
         result = compute_amount_of_asns(grouped_asn_dict)
         # Check that the result matches the expected result
         self.assertEqual(result, expected_result)
+
+    def test_compute_percentage_per_date(self):
+        # Test case 1: msn_amounts contains 0 ASN IDs
+        msn_amounts = {"asn_amount": 0, "asn_v4_amount": 0, "asn_v6_amount": 0}
+        result = compute_percentage_per_date(msn_amounts, "2022-01-01")
+        self.assertEqual(result, {"name": "2022-01-01", "ip_v6": "0.00"})
+
+        # Test case 2: msn_amounts contains only IPv4 ASN IDs
+        msn_amounts = {"asn_amount": 2, "asn_v4_amount": 2, "asn_v6_amount": 0}
+        result = compute_percentage_per_date(msn_amounts, "2022-01-01")
+        self.assertEqual(result, {"name": "2022-01-01", "ip_v6": "0.00"})
+
+        # Test case 3: msn_amounts contains only IPv6 ASN IDs
+        msn_amounts = {"asn_amount": 2, "asn_v4_amount": 0, "asn_v6_amount": 2}
+        result = compute_percentage_per_date(msn_amounts, "2022-01-01")
+        self.assertEqual(result, {"name": "2022-01-01", "ip_v6": "100.00"})
+
+        # Test case 4: msn_amounts contains both IPv4 and IPv6 ASN IDs
+        msn_amounts = {"asn_amount": 4, "asn_v4_amount": 2, "asn_v6_amount": 2}
+        result = compute_percentage_per_date(msn_amounts, "2022-01-01")
+        self.assertEqual(result, {"name": "2022-01-01", "ip_v6": "50.00"})
