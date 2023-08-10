@@ -27,6 +27,17 @@ class TestUtils(unittest.TestCase):
         # Test that the function returns 0 for an empty list
         self.assertEqual(compute_average([]), 0)
 
+    def test_convert_two_letter_to_three_letter_code(self):
+        # Test valid input
+        self.assertEqual(convert_two_letter_to_three_letter_code("US"), "USA")
+        self.assertEqual(convert_two_letter_to_three_letter_code("GB"), "GBR")
+        self.assertEqual(convert_two_letter_to_three_letter_code("CA"), "CAN")
+
+        # Test invalid input
+        self.assertIsNone(convert_two_letter_to_three_letter_code("XX"))
+        self.assertIsNone(convert_two_letter_to_three_letter_code("123"))
+        self.assertIsNone(convert_two_letter_to_three_letter_code(""))
+
     def test_prepare_results_for_frontend(self):
         # Define a dictionary of results
         input_results = {"a": 1.0, "b": 2.0, "c": 3.0}
