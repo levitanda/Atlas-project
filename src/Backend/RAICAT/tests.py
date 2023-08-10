@@ -19,6 +19,8 @@ from .utils import (
     compute_average_rtt_and_country_code,
     check_dns_measurements,
     compute_date_range,
+    check_probes_asn_version_support,
+    compute_distinct_asn_ids_per_type,
 )
 from .fixtures.dns_ripe_atlas_fixtures import (
     dns_ripe_atlas_measurements_per_2021_01_01_api_response_fixture,
@@ -185,5 +187,55 @@ class TestUtils(unittest.TestCase):
         expected_result = ["2022-01-01", "2022-01-02", "2022-01-03"]
         # Call the compute_date_range function with the start and end dates
         result = compute_date_range(start_date, end_date)
+        # Check that the result matches the expected result
+        self.assertEqual(result, expected_result)
+
+    def test_check_probes_asn_version_support(self):
+        # Define the input parameters for the function
+        probe_ids = [1, 2, 3]
+        start_date = "2022-01-01"
+        end_date = "2022-01-03"
+        # Call the check_probes_asn_version_support function with the input parameters
+        result = check_probes_asn_version_support(
+            probe_ids, start_date, end_date
+        )
+        # Check that the result is a list
+        self.assertIsInstance(result, list)
+        # Check that each item in the list is a dictionary
+        for item in result:
+            self.assertIsInstance(item, dict)
+            # Check that each dictionary contains the ASN version for IPv4 and IPv6, as well as the date
+            self.assertIn("asn_v4", item)
+            self.assertIn("asn_v6", item)
+            self.assertIn("date", item)
+            # Check that the ASN versions are integers
+            self.assertIsInstance(item["asn_v4"], int)
+            self.assertIsInstance(item["asn_v6"], int)
+            # Check that the date is a string in the format "YYYY-MM-DD"
+            self.assertIsInstance(item["date"], str)
+            self.assertEqual(
+                datetime.strptime(item["date"], "%Y-%m-%d").strftime(
+                    "%Y-%m-%d"
+                ),
+                item["date"],
+            )
+
+
+    def test_compute_distinct_asn_ids_per_type(self):
+        # Define a list of dictionaries representing the ASN status of probes by date
+        probes_asn_status_by_date = [
+            {"asn_v4": "AS1", "asn_v6": "AS2"},
+            {"asn_v4": "AS1", "asn_v6": "AS1"},
+            {"asn_v4": "AS4", "asn_v6": "AS3"},
+            {"asn_v4": "AS5", "asn_v6": "AS6"},
+            {"asn_v4": "AS5", "asn_v6": "AS6"},
+        ]
+        # Define the expected result of the function
+        expected_result = {
+            "distinct_asn_v4_names": ["AS1", "AS4", "AS5"],
+            "distinct_asn_v6_names": ["AS2", "AS1", "AS3", "AS6"],
+        }
+        # Call the compute_distinct_asn_ids_per_type function with the input data
+        result = compute_distinct_asn_ids_per_type(probes_asn_status_by_date)
         # Check that the result matches the expected result
         self.assertEqual(result, expected_result)
