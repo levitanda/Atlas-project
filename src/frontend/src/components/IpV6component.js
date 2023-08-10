@@ -1,16 +1,21 @@
 import React, { useState, useMemo, useEffect } from "react";
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
+  //LineChart,
+  //Line,
+  //XAxis,
+  //YAxis,
+  //CartesianGrid,
+  //Tooltip,
+  //Legend,
+  //ResponsiveContainer,
 } from "recharts";
 import { Container, Row, Form, Button, Col, Spinner } from "react-bootstrap";
 import countryList from "react-select-country-list";
+import {
+  LineChartGraphBody,
+  DatesCountryForm,
+} from "./DnsGraph.js";
+import { geojson } from "./geo_data.js";
 
 export const get_current_date = () => new Date().toISOString().split("T")[0];
 export const get_n_days_ago_from_current_date = (n) => {
@@ -24,7 +29,7 @@ export const get_n_days_ago_from_given_date = (date, n) => {
   date_obj.setDate(date_obj.getDate() - n);
   return date_obj.toISOString().split("T")[0];
 };
-
+{/*
 const DateTimeCountryForm = ({ updateData, initialData }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -88,8 +93,8 @@ const DateTimeCountryForm = ({ updateData, initialData }) => {
     </Form>
   );
 };
-
-const LineIPv6Graph = ({ data }) => {
+*/}
+{/*const LineIPv6Graph = ({ data }) => {
   return (
     <ResponsiveContainer width="100%">
       <LineChart
@@ -114,8 +119,9 @@ const LineIPv6Graph = ({ data }) => {
     </ResponsiveContainer>
   );
 };
+*/}
 
-const IpV6Controller = () => {
+{/*const IpV6Controller = () => {
   const [data, setData] = useState([]);
 
   const computeInitialData = () => {
@@ -184,6 +190,84 @@ const IpV6Controller = () => {
           />
         </Col>
       </Row>
+    </Container>
+  );
+};*/}
+
+const IpV6Controller = () => {
+  const [country_code, setCountryCode] = useState("ISR");
+  const [country_chart_date, setCountryChartDate] = useState(
+    get_current_date()
+  );
+  //Need mode for using DNSLifeChartGraphBody function
+  const [mode, changeMode] = useState("whole_world");
+  const geo_options = useMemo(
+    () =>
+      geojson.objects.world.geometries.map((item) => {
+        return { value: item.id, label: item.properties.name };
+      }),
+    []
+  );
+  const [state, setState] = useState({
+    data: [],
+    startDate: get_n_days_ago_from_given_date(country_chart_date, 2),
+    endDate: country_chart_date,
+    countries: [geo_options.find((item) => item.value == country_code)],
+  });
+  const setIsLoadingState = (loadingState) => {
+    setState({ ...state, isLoading: loadingState });
+  };
+  const updateData = (newData) => {
+    setState({ ...state, data: newData });
+  };
+  const updateSelectedCountries = (newCountries) => {
+    setState({ ...state, countries: newCountries });
+  };
+  const updateDates = (newStartDate, newEndDate) => {
+    setState({ ...state, startDate: newStartDate, endDate: newEndDate });
+  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoadingState(true);
+        console.log("real loading")
+        //TODO: check if I can use state.countries this way!
+        const country_code = state.countries;
+        const first_date = state.startDate;
+        const second_date = state.endDate;
+        const response = await fetch(
+          `/ipv/country=${country_code}&first_date=${first_date}&second_date=${second_date}`
+        );
+        const jsonData = await response.json();
+        setIsLoadingState(false);
+        updateData(jsonData.data);
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
+    fetchData();
+  }, [state.startDate, state.endDate, state.countries]);
+  return (
+    <Container>
+      {!state.isLoading ? (
+        <React.Fragment>
+          <Row>
+            <LineChartGraphBody
+              state={state}
+              changeMode={changeMode}
+              setCountryChartDate={setCountryChartDate}
+            />
+          </Row>
+          <DatesCountryForm
+            updateDates={updateDates}
+            updateSelectedCountries={updateSelectedCountries}
+            state={state}
+            geo_options={geo_options}
+          />
+        </React.Fragment>
+      ) : (
+        <LoadingSpinner />
+      )}
     </Container>
   );
 };
