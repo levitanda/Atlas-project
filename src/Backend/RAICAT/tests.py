@@ -25,6 +25,7 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(compute_average([1, 1, 1, 1, 1]), 1.0)
         self.assertEqual(compute_average([]), 0)
 
+
     def test_prepare_results_for_frontend(self):
         results = {"a": 1.0, "b": 2.0, "c": 3.0}
         expected_output = {
