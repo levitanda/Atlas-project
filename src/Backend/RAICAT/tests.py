@@ -16,6 +16,9 @@ from .utils import (
     get_dns_ripe_atlas_measurement_for_date,
     convert_two_letter_to_three_letter_code,
 )
+from .fixtures.dns_ripe_atlas_fixtures import (
+    dns_ripe_atlas_measurement_per_2021_01_01,
+)
 
 
 class TestUtils(unittest.TestCase):
@@ -61,37 +64,28 @@ class TestUtils(unittest.TestCase):
             convert_to_timestamp("2022-01-01", delta_days=1), 1641081600
         )
 
-        def test_compute_country_code_by_probe_id_dict(self):
-            # Define a list of probes with their IDs and country codes
-            probes = [
-                {"id": 1, "country_code": "US"},
-                {"id": 2, "country_code": "CA"},
-                {"id": 3, "country_code": None},
-                {"id": 4, "country_code": "MX"},
-            ]
-            # Define the expected result of the function
-            expected_result = {1: "US", 2: "CA", 4: "MX"}
-            # Call the function with the probes list and check if the result matches the expected result
-            result = compute_country_code_by_probe_id_dict(probes)
-            self.assertEqual(result, expected_result)
+    def test_compute_country_code_by_probe_id_dict(self):
+        # Define a list of probes with their IDs and country codes
+        probes = [
+            {"id": 1, "country_code": "US"},
+            {"id": 2, "country_code": "CA"},
+            {"id": 3, "country_code": None},
+            {"id": 4, "country_code": "MX"},
+        ]
+        # Define the expected result of the function
+        expected_result = {1: "US", 2: "CA", 4: "MX"}
+        # Call the function with the probes list and check if the result matches the expected result
+        result = compute_country_code_by_probe_id_dict(probes)
+        self.assertEqual(result, expected_result)
+
+        def test_get_dns_ripe_atlas_measurement_for_date(self):
+            # Define the expected output of the function
+            expected_output = dns_ripe_atlas_measurement_per_2021_01_01
+            # Call the function with a specific date and check if the result matches the expected output
+            real_result = get_dns_ripe_atlas_measurement_for_date("2021-01-01")
+            self.assertEqual(real_result, expected_output)
 
 
-    # def test_compute_country_code_by_probe_id_dict(self):
-    #     expected_output = {
-    #         1: "US",
-    #         2: "CA",
-    #         3: "MX",
-    #     }
-    #     with patch(
-    #         "RAICAT.utils.probes_data",
-    #         [
-    #             {"id": 1, "country_code": "US"},
-    #             {"id": 2, "country_code": "CA"},
-    #             {"id": 3, "country_code": "MX"},
-    #             {"id": 4, "country_code": None},
-    #         ],
-    #     ):
-    #         self.assertEqual(compute_country_code_by_probe_id_dict(), expected_output)
 
     # def test_get_dns_ripe_atlas_measurement_for_date(self):
     #     expected_output = {"results": []}
