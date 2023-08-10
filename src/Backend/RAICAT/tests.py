@@ -29,13 +29,14 @@ class TestUtils(unittest.TestCase):
         results = {"a": 1.0, "b": 2.0, "c": 3.0}
         expected_output = {
             "data": results,
-            "min": 0,
+            "min": 1.0,
             "max": 3.0,
             "average": 2.0,
         }
         self.assertEqual(
             prepare_results_for_frontend(results), expected_output
         )
+        print("passed")
 
     def test_convert_to_timestamp(self):
         self.assertEqual(convert_to_timestamp("2022-01-01"), 1640995200)
