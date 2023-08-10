@@ -61,10 +61,12 @@ def prepare_results_for_frontend(
     Returns:
         Dict[str, Union[List[float], float]]: A dictionary containing the data, min, max, and average values.
     """
+    result_values = list(results.values()) or [0]
+    # if result is empty, set min and max to 0
     return {
         "data": results,
-        "min": min(list(results.values()) + [0]),
-        "max": max(list(results.values()) + [0]),
+        "min": min(result_values),
+        "max": max(result_values),
         "average": compute_average(list(results.values())),
     }
 
@@ -85,7 +87,9 @@ def convert_to_timestamp(date_str: str, delta_days: int = 0) -> int:
     return int(dt_object.timestamp())
 
 
-def compute_country_code_by_probe_id_dict() -> Dict[int, Optional[str]]:
+def compute_country_code_by_probe_id_dict(
+    probes: List[Dict[str, Union[int, str]]]
+) -> Dict[int, Optional[str]]:
     """
     Computes a dictionary of probe IDs and their corresponding country codes.
 
@@ -94,7 +98,7 @@ def compute_country_code_by_probe_id_dict() -> Dict[int, Optional[str]]:
     """
     return {
         probe["id"]: probe["country_code"]
-        for probe in probes_data
+        for probe in probes
         if probe["country_code"] is not None
     }
 
@@ -192,7 +196,7 @@ def check_dns_measurements(date: str) -> Dict[str, Union[List[float], float]]:
     """
     country_code_by_probe_id_hash: Dict[
         int, Optional[str]
-    ] = compute_country_code_by_probe_id_dict()
+    ] = compute_country_code_by_probe_id_dict(probes=probes_data)
 
     response_results: dict = get_dns_ripe_atlas_measurement_for_date(date)
 
