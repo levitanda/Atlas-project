@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from typing import List, Dict, Union, Optional
 from ripe.atlas.cousteau import AtlasRequest
-from ripe.atlas.sagan import Result, DnsResult
 import pydash as _
 import pycountry
 from .probes_db import probes_data
@@ -453,3 +452,74 @@ def compute_ipv6_percentage(
         .value()
     )
     return result
+
+
+def compute_fragmented_data(
+    start_date: str,
+    end_date: str,
+    countries_data: List[Dict[str, Union[str, float]]],
+    computation_routine: callable = compute_dns_between_dates,
+) -> List[Dict[str, Union[str, float]]]:
+    """
+    Computes the fragmented data between two dates for a given list of countries.
+
+    Args:
+    - start_date (str): The start date in the format of 'YYYY-MM-DD'.
+    - end_date (str): The end date in the format of 'YYYY-MM-DD'.
+    - countries_data (list): A list of dictionaries containing the some measurements for each country in format countries_data = [{'name': '2020-01-01',"US": 25.1,.. },...]
+    - computation_routine (callable): A function that computes the DNS measurements between two dates.
+
+    Returns:
+    - list: A list of dictionaries containing the DNS/IPv6 measurements for each country between the start and end dates.
+    """
+    start_date_timestamp = convert_to_timestamp(start_date)
+    end_date_timestamp = convert_to_timestamp(end_date)
+    last_day_in_cache = countries_data[-1]["name"]
+    first_date_in_cache = countries_data[0]["name"]
+    (
+        first_date_in_cache_timestamp,
+        last_day_in_cache_timestamp,
+        cached_dates,
+    ) = (
+        convert_to_timestamp(first_date_in_cache),
+        convert_to_timestamp(last_day_in_cache),
+        [item["name"] for item in countries_data],
+    )
+
+    # Check if the start date is within the cached dates
+    if (
+        start_date_timestamp >= first_date_in_cache_timestamp
+        and start_date_timestamp <= last_day_in_cache_timestamp
+    ):
+        start_index = cached_dates.index(start_date)
+        if end_date_timestamp <= last_day_in_cache_timestamp:
+            end_index = cached_dates.index(end_date)
+            return countries_data[start_index : end_index + 1]
+        else:
+            # end_date > last_day_in_cache_timestamp
+            result = countries_data[start_index:]
+            result.extend(computation_routine(last_day_in_cache, end_date)[1:])
+            return result
+
+    # Check if the start date is before the cached dates and the end date is within the cached dates
+    elif (
+        start_date_timestamp < first_date_in_cache_timestamp
+        and end_date_timestamp >= first_date_in_cache_timestamp
+        # and end_date_timestamp <= last_day_in_cache_timestamp
+    ):
+        # start_date < first_date_in_cache_timestamp
+        if end_date_timestamp <= last_day_in_cache_timestamp:
+            end_index = cached_dates.index(end_date)
+            result = computation_routine(start_date, first_date_in_cache)
+            result.extend(countries_data[1 : end_index + 1])
+            return result
+        else:
+            # end_date > last_day_in_cache_timestamp
+            result = computation_routine(start_date, first_date_in_cache)
+            result.extend(countries_data[1:-1])
+            result.extend(computation_routine(last_day_in_cache, end_date))
+            return result
+
+    # If the start and end dates are not within the cached dates
+    else:
+        return computation_routine(start_date, end_date)

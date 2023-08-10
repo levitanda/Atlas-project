@@ -3,8 +3,6 @@ from typing import Dict, List, Union
 from unittest import mock
 import unittest
 
-from ripe.atlas.sagan import Result
-
 
 from .utils import (
     STOPPED,
@@ -25,6 +23,7 @@ from .utils import (
     compute_amount_of_asns,
     compute_percentage_per_date,
     compute_ipv6_percentage,
+    compute_fragmented_data,
 )
 from .fixtures.dns_ripe_atlas_fixtures import (
     dns_ripe_atlas_measurements_per_2021_01_01_api_response_fixture,
@@ -303,3 +302,91 @@ class TestUtils(unittest.TestCase):
         result = compute_ipv6_percentage("US", "2020-01-01", "2020-01-02")
         # Check that the result matches the expected result
         self.assertEqual(result, expected_result)
+
+    def test_compute_fragmented_data(self):
+        # Define test data
+        def computation_routine(start_date, end_date):
+            return [
+                {"name": item, "US": 25.1, "UK": 30.2}
+                for item in compute_date_range(start_date, end_date)
+            ]
+
+        start_date = "2022-01-01"
+        end_date = "2022-01-03"
+
+        countries_data = [
+            {"name": "2022-01-01", "US": 25.1, "UK": 30.2},
+            {"name": "2022-01-02", "US": 28.5, "UK": 31.7},
+            {"name": "2022-01-03", "US": 27.3, "UK": 29.8},
+        ]
+
+        # Call the function being tested
+        result = compute_fragmented_data(
+            start_date,
+            end_date,
+            countries_data,
+            computation_routine,
+        )
+        self.assertEqual(result, countries_data)
+        # ----------------------------
+        start_date = "2022-01-01"
+        end_date = "2022-01-04"
+
+        countries_data = [
+            {"name": "2022-01-01", "US": 25.1, "UK": 30.2},
+            {"name": "2022-01-02", "US": 28.5, "UK": 31.7},
+            {"name": "2022-01-03", "US": 27.3, "UK": 29.8},
+        ]
+
+        # Call the function being tested
+        result = compute_fragmented_data(
+            start_date,
+            end_date,
+            countries_data,
+            computation_routine,
+        )
+        expected_output = countries_data + [
+            {"name": "2022-01-04", "US": 25.1, "UK": 30.2}
+        ]
+        self.assertEqual(result, expected_output)
+
+        # ----------------------------
+        start_date = "2021-12-31"
+        end_date = "2022-01-03"
+
+        countries_data = [
+            {"name": "2022-01-01", "US": 25.1, "UK": 30.2},
+            {"name": "2022-01-02", "US": 28.5, "UK": 31.7},
+            {"name": "2022-01-03", "US": 27.3, "UK": 29.8},
+        ]
+        result = compute_fragmented_data(
+            start_date,
+            end_date,
+            countries_data,
+            computation_routine,
+        )
+        expected_output = [
+            {"name": "2021-12-31", "US": 25.1, "UK": 30.2}
+        ] + countries_data
+        self.assertEqual(result, expected_output)
+        # ----------------------------
+        start_date = "2021-12-31"
+        end_date = "2022-01-04"
+
+        countries_data = [
+            {"name": "2022-01-01", "US": 25.1, "UK": 30.2},
+            {"name": "2022-01-02", "US": 25.1, "UK": 30.2},
+            {"name": "2022-01-03", "US": 25.1, "UK": 30.2},
+        ]
+        result = compute_fragmented_data(
+            start_date,
+            end_date,
+            countries_data,
+            computation_routine,
+        )
+        expected_output = (
+            [{"name": "2021-12-31", "US": 25.1, "UK": 30.2}]
+            + countries_data
+            + [{"name": "2022-01-04", "US": 25.1, "UK": 30.2}]
+        )
+        self.assertEqual(result, expected_output)
