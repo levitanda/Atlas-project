@@ -13,3 +13,5 @@ src/Backend/requirements.txt
 src/frontend/package-lock.json
 src/Backend/ipv6_deltas.py
 src/Backend/file.py
+src/Backend/static/*
+
