@@ -21,29 +21,36 @@ from .utils import (
 
 class TestUtils(unittest.TestCase):
     def test_compute_average(self):
+        # Test that the function returns the correct average for a list of integers
         self.assertEqual(compute_average([1, 2, 3, 4, 5]), 3.0)
+        # Test that the function returns the correct average for a list of identical integers
         self.assertEqual(compute_average([1, 1, 1, 1, 1]), 1.0)
+        # Test that the function returns 0 for an empty list
         self.assertEqual(compute_average([]), 0)
 
 
     def test_prepare_results_for_frontend(self):
-        results = {"a": 1.0, "b": 2.0, "c": 3.0}
+        # Define a dictionary of results
+        input_results = {"a": 1.0, "b": 2.0, "c": 3.0}
+        # Define the expected output dictionary
         expected_output = {
-            "data": results,
+            "data": input_results,
             "min": 1.0,
             "max": 3.0,
             "average": 2.0,
         }
-        self.assertEqual(
-            prepare_results_for_frontend(results), expected_output
-        )
-        print("passed")
+        # Test that the prepare_results_for_frontend function returns the expected output
+        self.assertEqual(prepare_results_for_frontend(input_results), expected_output)
 
-    def test_convert_to_timestamp(self):
-        self.assertEqual(convert_to_timestamp("2022-01-01"), 1640995200)
-        self.assertEqual(
-            convert_to_timestamp("2022-01-01", delta_days=1), 1641081600
-        )
+
+        def test_convert_to_timestamp(self):
+            # Test that the function returns the correct timestamp for a given date
+            self.assertEqual(convert_to_timestamp("2022-01-01"), 1640995200)
+            # Test that the function returns the correct timestamp for a given date and delta_days
+            self.assertEqual(
+                convert_to_timestamp("2022-01-01", delta_days=1), 1641081600
+            )
+
 
     # def test_compute_country_code_by_probe_id_dict(self):
     #     expected_output = {
