@@ -154,14 +154,19 @@ class TestUtils(unittest.TestCase):
                 "FR"
             )
 
-    # def test_get_dns_ripe_atlas_measurement_for_date(self):
-    #     expected_output = {"results": []}
-    #     with patch("ripe.atlas.cousteau.AtlasRequest") as mock_request:
-    #         mock_request().get.return_value = expected_output
-    #         self.assertEqual(
-    #             get_dns_ripe_atlas_measurement_for_date("2022-01-01"), expected_output
-    #         )
+    # @mock.patch("RAICAT.utils.compute_country_code_by_probe_id_dict")
+    @mock.patch("RAICAT.utils.get_dns_ripe_atlas_measurement_for_date")
+    def test_check_dns_measurements(
+        self,
+        mock_get_dns,
+    ):
+        # Set up mock data
+        mock_get_dns.return_value = (
+            dns_ripe_atlas_measurements_per_2021_01_01_api_response_fixture
+        )
 
-    # def test_convert_two_letter_to_three_letter_code(self):
-    #     self.assertEqual(convert_two_letter_to_three_letter_code("US"), "USA")
-    #     self.assertIsNone(convert_two_letter_to_three_letter_code("XX"))
+        # Call the function with mock data
+        result = check_dns_measurements("2021-01-01")
+
+        # Check that the result is as expected
+        self.assertEqual(result, pre_computed_dns_result_2021_01_01_fixture)
