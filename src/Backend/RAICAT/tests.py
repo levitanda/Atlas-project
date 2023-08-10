@@ -15,9 +15,10 @@ from .utils import (
     compute_country_code_by_probe_id_dict,
     get_dns_ripe_atlas_measurement_for_date,
     convert_two_letter_to_three_letter_code,
+    select_relevant_attributes_from_ripe_atlas_response,
 )
 from .fixtures.dns_ripe_atlas_fixtures import (
-    dns_ripe_atlas_measurement_per_2021_01_01,
+    dns_ripe_atlas_measurements_per_2021_01_01_api_response_fixture,
 )
 
 
@@ -78,14 +79,39 @@ class TestUtils(unittest.TestCase):
         result = compute_country_code_by_probe_id_dict(probes)
         self.assertEqual(result, expected_result)
 
-        def test_get_dns_ripe_atlas_measurement_for_date(self):
-            # Define the expected output of the function
-            expected_output = dns_ripe_atlas_measurement_per_2021_01_01
-            # Call the function with a specific date and check if the result matches the expected output
-            real_result = get_dns_ripe_atlas_measurement_for_date("2021-01-01")
-            self.assertEqual(real_result, expected_output)
+    def test_get_dns_ripe_atlas_measurement_for_date(self):
+        # Define the expected output of the function
+        expected_output = (
+            dns_ripe_atlas_measurements_per_2021_01_01_api_response_fixture
+        )
+        # Call the function with a specific date and check if the result matches the expected output
+        real_result = get_dns_ripe_atlas_measurement_for_date("2021-01-01")
+        self.assertEqual(real_result, expected_output)
 
+    def test_select_relevant_attributes_from_ripe_atlas_response(self):
+        # Test case 1: valid input
+        input_dict = {"prb_id": 123, "result": {"rt": 10.0}}
+        expected_output_dict = {"probe_id": 123, "rtt_results": 10.0}
+        self.assertEqual(
+            select_relevant_attributes_from_ripe_atlas_response(input_dict),
+            expected_output_dict,
+        )
 
+        # Test case 2: missing "result" key
+        input_dict = {"prb_id": 123}
+        expected_output_dict = {"probe_id": 123, "rtt_results": -1}
+        self.assertEqual(
+            select_relevant_attributes_from_ripe_atlas_response(input_dict),
+            expected_output_dict,
+        )
+
+        # Test case 3: missing "rt" key in "result" dict
+        input_dict = {"prb_id": 123, "result": {}}
+        expected_output_dict = {"probe_id": 123, "rtt_results": -1}
+        self.assertEqual(
+            select_relevant_attributes_from_ripe_atlas_response(input_dict),
+            expected_output_dict,
+        )
 
     # def test_get_dns_ripe_atlas_measurement_for_date(self):
     #     expected_output = {"results": []}
