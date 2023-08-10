@@ -13,6 +13,18 @@
                 "runserver"
             ],
             "django": true,
+            "justMyCode": false 
+        },
+        {
+            "name": "Django:Server Tests",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/Backend/manage.py",
+            "args": [
+                "test"
+            ],
+            "cwd": "${workspaceFolder}/src/Backend",
+            "django": true,
             "justMyCode": false
         },
         {

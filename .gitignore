@@ -9,7 +9,7 @@ src/Backend/requirements.txt
 
 src/Backend/requirements.txt
 
-.vscode/
+.vscode/settings.json
 src/frontend/package-lock.json
 src/Backend/ipv6_deltas.py
 src/Backend/file.py
