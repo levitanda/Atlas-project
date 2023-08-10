@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Dict, List, Union
-from unittest.mock import patch, MagicMock
+from unittest import mock
 import unittest
 
 from ripe.atlas.sagan import Result
@@ -16,9 +16,14 @@ from .utils import (
     get_dns_ripe_atlas_measurement_for_date,
     convert_two_letter_to_three_letter_code,
     select_relevant_attributes_from_ripe_atlas_response,
+    compute_average_rtt_and_country_code,
+    check_dns_measurements,
 )
 from .fixtures.dns_ripe_atlas_fixtures import (
     dns_ripe_atlas_measurements_per_2021_01_01_api_response_fixture,
+)
+from .fixtures.computed_dns_result import (
+    pre_computed_dns_result_2021_01_01_fixture,
 )
 
 
