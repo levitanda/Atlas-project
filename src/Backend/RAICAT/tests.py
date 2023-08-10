@@ -18,6 +18,7 @@ from .utils import (
     select_relevant_attributes_from_ripe_atlas_response,
     compute_average_rtt_and_country_code,
     check_dns_measurements,
+    compute_date_range,
 )
 from .fixtures.dns_ripe_atlas_fixtures import (
     dns_ripe_atlas_measurements_per_2021_01_01_api_response_fixture,
@@ -175,3 +176,14 @@ class TestUtils(unittest.TestCase):
 
         # Check that the result is as expected
         self.assertEqual(result, pre_computed_dns_result_2021_01_01_fixture)
+
+    def test_compute_date_range(self):
+        # Define the start and end dates for the date range
+        start_date = "2022-01-01"
+        end_date = "2022-01-03"
+        # Define the expected result of the function
+        expected_result = ["2022-01-01", "2022-01-02", "2022-01-03"]
+        # Call the compute_date_range function with the start and end dates
+        result = compute_date_range(start_date, end_date)
+        # Check that the result matches the expected result
+        self.assertEqual(result, expected_result)
