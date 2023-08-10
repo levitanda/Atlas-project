@@ -61,6 +61,21 @@ class TestUtils(unittest.TestCase):
             convert_to_timestamp("2022-01-01", delta_days=1), 1641081600
         )
 
+        def test_compute_country_code_by_probe_id_dict(self):
+            # Define a list of probes with their IDs and country codes
+            probes = [
+                {"id": 1, "country_code": "US"},
+                {"id": 2, "country_code": "CA"},
+                {"id": 3, "country_code": None},
+                {"id": 4, "country_code": "MX"},
+            ]
+            # Define the expected result of the function
+            expected_result = {1: "US", 2: "CA", 4: "MX"}
+            # Call the function with the probes list and check if the result matches the expected result
+            result = compute_country_code_by_probe_id_dict(probes)
+            self.assertEqual(result, expected_result)
+
+
     # def test_compute_country_code_by_probe_id_dict(self):
     #     expected_output = {
     #         1: "US",
