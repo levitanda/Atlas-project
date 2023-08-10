@@ -21,6 +21,7 @@ from .utils import (
     compute_date_range,
     check_probes_asn_version_support,
     compute_distinct_asn_ids_per_type,
+    compute_amount_of_asns,
 )
 from .fixtures.dns_ripe_atlas_fixtures import (
     dns_ripe_atlas_measurements_per_2021_01_01_api_response_fixture,
@@ -220,7 +221,6 @@ class TestUtils(unittest.TestCase):
                 item["date"],
             )
 
-
     def test_compute_distinct_asn_ids_per_type(self):
         # Define a list of dictionaries representing the ASN status of probes by date
         probes_asn_status_by_date = [
@@ -237,5 +237,22 @@ class TestUtils(unittest.TestCase):
         }
         # Call the compute_distinct_asn_ids_per_type function with the input data
         result = compute_distinct_asn_ids_per_type(probes_asn_status_by_date)
+        # Check that the result matches the expected result
+        self.assertEqual(result, expected_result)
+
+    def test_compute_amount_of_asns(self):
+        # Define a dictionary of distinct ASN names for IPv4 and IPv6
+        grouped_asn_dict = {
+            "distinct_asn_v4_names": ["ASN1", "ASN2", "ASN3"],
+            "distinct_asn_v6_names": ["ASN1", "ASN4", "ASN5"],
+        }
+        # Define the expected result of the function
+        expected_result = {
+            "asn_amount": 5,
+            "asn_v4_amount": 3,
+            "asn_v6_amount": 3,
+        }
+        # Call the compute_amount_of_asns function with the input data
+        result = compute_amount_of_asns(grouped_asn_dict)
         # Check that the result matches the expected result
         self.assertEqual(result, expected_result)
