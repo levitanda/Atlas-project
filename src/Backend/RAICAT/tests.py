@@ -19,6 +19,7 @@ from .utils import (
     compute_average_rtt_and_country_code,
     check_dns_measurements,
     compute_date_range,
+    compute_dns_between_dates,
     check_probes_asn_version_support,
     compute_distinct_asn_ids_per_type,
     compute_amount_of_asns,
@@ -30,6 +31,7 @@ from .fixtures.dns_ripe_atlas_fixtures import (
 )
 from .fixtures.computed_dns_result import (
     pre_computed_dns_result_2021_01_01_fixture,
+    computed_dns_result_between_2021_01_01_and_2021_01_02_fixture,
 )
 
 
@@ -190,6 +192,17 @@ class TestUtils(unittest.TestCase):
         expected_result = ["2022-01-01", "2022-01-02", "2022-01-03"]
         # Call the compute_date_range function with the start and end dates
         result = compute_date_range(start_date, end_date)
+        # Check that the result matches the expected result
+        self.assertEqual(result, expected_result)
+
+    def test_compute_dns_between_dates(self):
+        # Define the expected result of the function
+        expected_result = (
+            computed_dns_result_between_2021_01_01_and_2021_01_02_fixture
+        )
+
+        # Call the compute_ipv6_percentage function with the input data
+        result = compute_dns_between_dates("2021-01-01", "2021-01-02")
         # Check that the result matches the expected result
         self.assertEqual(result, expected_result)
 
