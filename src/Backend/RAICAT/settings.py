@@ -132,8 +132,8 @@ STATICFILE_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 STATIC_ROOT = BASE_DIR / "static"
 DEBUG = True
 CRA_APP_NAME = "../frontend"
-STATIC_URL = "frontend/build/static/"
-# CRA_PACKAGE_JSON_HOMEPAGE = "/frontend/build/"
+STATIC_URL = "static/"
+
 ALLOWED_HOSTS = ["*"]
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
