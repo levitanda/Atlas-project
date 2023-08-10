@@ -61,10 +61,12 @@ def prepare_results_for_frontend(
     Returns:
         Dict[str, Union[List[float], float]]: A dictionary containing the data, min, max, and average values.
     """
+    result_values = list(results.values()) or [0]
+    # if result is empty, set min and max to 0
     return {
         "data": results,
-        "min": min(list(results.values()) + [0]),
-        "max": max(list(results.values()) + [0]),
+        "min": min(result_values),
+        "max": max(result_values),
         "average": compute_average(list(results.values())),
     }
 
