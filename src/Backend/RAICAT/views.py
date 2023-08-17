@@ -4,7 +4,6 @@ from .utils import (
     compute_ipv6_percentage,
     prepare_results_for_frontend,
     compute_dns_between_dates,
-    convert_to_timestamp,
     compute_fragmented_data,
     compute_ipv6_percentage_between_dates_for_country_list
 )

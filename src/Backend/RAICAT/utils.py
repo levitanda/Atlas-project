@@ -54,10 +54,10 @@ def convert_three_letter_to_two_letter_code(
     Given a three-letter country code, returns the corresponding two-letter country code.
 
     Args:
-        two_letter_code (str): A two-letter country code.
+        three_letter_code (str): A three-letter country code.
 
     Returns:
-        Union[str, None]: The corresponding two-letter country code, or None if the code is invalid.
+        Union[str, None]: The corresponding three-letter country code, or None if the code is invalid.
     """
     try:
         country = pycountry.countries.get(alpha_3=three_letter_code)
@@ -67,6 +67,7 @@ def convert_three_letter_to_two_letter_code(
             return None
     except LookupError:
         return None
+
 
 def prepare_results_for_frontend(
     results: Dict[str, float]
