@@ -47,6 +47,26 @@ def convert_two_letter_to_three_letter_code(
     except LookupError:
         return None
 
+def convert_three_letter_to_two_letter_code(
+    three_letter_code: str,
+) -> Union[str, None]:
+    """
+    Given a three-letter country code, returns the corresponding two-letter country code.
+
+    Args:
+        two_letter_code (str): A two-letter country code.
+
+    Returns:
+        Union[str, None]: The corresponding two-letter country code, or None if the code is invalid.
+    """
+    try:
+        country = pycountry.countries.get(alpha_3=three_letter_code)
+        if country:
+            return country.alpha_2
+        else:
+            return None
+    except LookupError:
+        return None
 
 def prepare_results_for_frontend(
     results: Dict[str, float]
@@ -416,7 +436,7 @@ def compute_ipv6_percentage(
     probe_ids_by_country = [
         probe["id"]
         for probe in probes_data
-        if probe["country_code"] == country_code
+        if probe["country_code"] == convert_three_letter_to_two_letter_code(country_code)
     ]
     probes_status = check_probes_asn_version_support(
         probe_ids_by_country,
@@ -453,6 +473,31 @@ def compute_ipv6_percentage(
     )
     return result
 
+def compute_ipv6_percentage_between_dates_for_country_list(
+    selected_countries, start_date, end_date
+):
+    date_range = compute_date_range(start_date, end_date)
+    # generate date range for which you want to compute the data
+    result_placeholder = [
+        {"name": date, **{country["value"]: 0 for country in selected_countries}}
+        for date in date_range
+    ]
+    # create placeholder for the result
+    countries_data = result_placeholder
+    for country in selected_countries:
+        data = compute_ipv6_percentage(
+            country["value"],
+            start_date,
+            end_date,
+        )
+        for computed_result in data:
+            relevant_item = _.find(
+                countries_data,
+                lambda item: item["name"] == computed_result["name"],
+            )
+            country_code = country["value"]
+            relevant_item[country_code] = computed_result["ip_v6"]
+    return countries_data
 
 def compute_fragmented_data(
     start_date: str,
@@ -485,7 +530,7 @@ def compute_fragmented_data(
         convert_to_timestamp(last_day_in_cache),
         [item["name"] for item in countries_data],
     )
-
+    
     # Check if the start date is within the cached dates
     if (
         start_date_timestamp >= first_date_in_cache_timestamp
