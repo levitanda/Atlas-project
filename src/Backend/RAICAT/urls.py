@@ -35,7 +35,7 @@ urlpatterns = [
     ),
     path("raicat/", TemplateView.as_view(template_name="entry_point.html")),
     re_path(
-        r"^ipv/country=(?P<country>[A-Za-z]{2})&first_date=(?P<first_date>\d{4}-\d{2}-\d{2})&second_date=(?P<second_date>\d{4}-\d{2}-\d{2})/$",
+        r"^ipv/country=(?P<countries>[\w\s\S]+)&first_date=(?P<first_date>\d{4}-\d{2}-\d{2})&second_date=(?P<second_date>\d{4}-\d{2}-\d{2})/$",
         ipv6_data,
         name="",
     ),
