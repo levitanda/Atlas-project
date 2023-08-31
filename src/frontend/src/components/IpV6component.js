@@ -1,20 +1,16 @@
 import React, { useState, useMemo, useEffect } from "react";
-import {
-  //LineChart,
-  //Line,
-  //XAxis,
-  //YAxis,
-  //CartesianGrid,
-  //Tooltip,
-  //Legend,
-  //ResponsiveContainer,
-} from "recharts";
+import //LineChart,
+//Line,
+//XAxis,
+//YAxis,
+//CartesianGrid,
+//Tooltip,
+//Legend,
+//ResponsiveContainer,
+"recharts";
 import { Container, Row, Form, Button, Col, Spinner } from "react-bootstrap";
 import countryList from "react-select-country-list";
-import {
-  LineChartGraphBody,
-  DatesCountryForm,
-} from "./DnsGraph.js";
+import { LineChartGraphBody, DatesCountryForm } from "./DnsGraph.js";
 import { geojson } from "./geo_data.js";
 
 export const get_current_date = () => new Date().toISOString().split("T")[0];
@@ -60,17 +56,17 @@ const IpV6Controller = () => {
     const fetchData = async () => {
       try {
         setIsLoadingState(true);
-        console.log("real loading")
+        console.log("real loading");
         //TODO: check if I can use state.countries this way!
         const first_date = state.startDate;
         const second_date = state.endDate;
-        console.log(first_date, second_date)
+        console.log(first_date, second_date);
         const jsonCountries = JSON.stringify(state.countries);
         const response = await fetch(
-            `/ipv/country=${jsonCountries}&first_date=${first_date}&second_date=${second_date}`
+          `/ipv/country=${jsonCountries}&first_date=${first_date}&second_date=${second_date}`
         );
         const jsonData = await response.json();
-        console.log(jsonData)
+        console.log(jsonData);
         setIsLoadingState(false);
         updateData(jsonData.data);
       } catch (error) {
@@ -84,9 +80,7 @@ const IpV6Controller = () => {
       {!state.isLoading ? (
         <React.Fragment>
           <Row>
-            <LineChartGraphBody
-              state={state}
-            />
+            <LineChartGraphBody state={state} />
           </Row>
           <DatesCountryForm
             updateDates={updateDates}
