@@ -1,15 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
-import //LineChart,
-//Line,
-//XAxis,
-//YAxis,
-//CartesianGrid,
-//Tooltip,
-//Legend,
-//ResponsiveContainer,
-"recharts";
-import { Container, Row, Form, Button, Col, Spinner } from "react-bootstrap";
-import countryList from "react-select-country-list";
+import "recharts";
+import { Container, Row, Spinner } from "react-bootstrap";
 import { LineChartGraphBody, DatesCountryForm } from "./DnsGraph.js";
 import { geojson } from "./geo_data.js";
 
@@ -36,8 +27,8 @@ const IpV6Controller = () => {
   );
   const [state, setState] = useState({
     data: [],
-    startDate: get_n_days_ago_from_given_date(get_current_date(), 2),
-    endDate: get_current_date(),
+    startDate: get_n_days_ago_from_given_date(get_current_date(), 30),
+    endDate: get_n_days_ago_from_given_date(get_current_date(), 1),
     countries: [geo_options.find((item) => item.value == "ISR")],
   });
   const setIsLoadingState = (loadingState) => {
