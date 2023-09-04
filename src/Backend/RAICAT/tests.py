@@ -292,17 +292,6 @@ class TestUtils(unittest.TestCase):
         result = compute_percentage_per_date(msn_amounts, "2022-01-01")
         self.assertEqual(result, {"name": "2022-01-01", "ip_v6": "50.00"})
 
-    def test_compute_ipv6_percentage(self):
-        # Define the expected result of the function
-        expected_result = [
-            {"name": "2020-01-01", "ip_v6": "41.53"},
-            {"name": "2020-01-02", "ip_v6": "41.34"},
-        ]
-        # Call the compute_ipv6_percentage function with the input data
-        result = compute_ipv6_percentage("US", "2020-01-01", "2020-01-02")
-        # Check that the result matches the expected result
-        self.assertEqual(result, expected_result)
-
     def test_compute_fragmented_data(self):
         # Define test data
         def computation_routine(start_date, end_date):

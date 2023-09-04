@@ -27,6 +27,7 @@ import {
   CartesianGrid,
   Tooltip as ChartTooltip,
   Legend,
+  Label,
   ResponsiveContainer,
   Brush,
 } from "recharts";
@@ -179,6 +180,7 @@ const DnsCountryLineChartController = ({
               state={state}
               changeMode={changeMode}
               setCountryChartDate={setCountryChartDate}
+              units={"DNS response time (ms)"}
             />
           </Row>
           <DatesCountryForm
@@ -199,6 +201,7 @@ export function LineChartGraphBody({
   state,
   changeMode = (item) => {},
   setCountryChartDate = (item) => {},
+  units = "IP v6 percentage ",
 }) {
   const colorScale = scaleLinear()
     .domain([0, state.countries.length])
@@ -222,7 +225,8 @@ export function LineChartGraphBody({
         <LineChart data={state.data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
-          <YAxis />
+          <YAxis label={{ value: units, angle: -90, position: "insideLeft" }} />
+
           <ChartTooltip />
           <Legend />
           {state.countries.map((country, index) => (
