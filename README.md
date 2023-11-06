@@ -30,6 +30,9 @@ RIPE Atlas plays a pivotal role in shaping the digital landscape by offering an 
 
 - **Policy Formulation**: Policymakers and regulators may use RIPE Atlas insights to understand the implications of network policies and regulatory changes. The platform provides empirical evidence that informs decision-making and contributes to the formulation of effective internet governance strategies.
 
+## Abstarct
+The Internet is a dynamic and intricate ecosystem susceptible to the influence of diverse factors, including cyber threats, political dynamics, and unforeseen events. Measuring and analyzing internet performance provides insights into its health, behavior, and response to external influences. RIPE Atlas, a worldwide network of probes, offers a wealth of real-time data on network connectivity, security, and stability. This project's aim is to leverage RIPE Atlas to create an analysis tool capable of identifying anomalies in internet behavior during the Covid-19 crisis.
+
 
 # IPv6 Deployment tool
 
