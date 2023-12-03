@@ -67,4 +67,4 @@ The primary objective of this tool section is to offer users an intuitive graphi
 
 # Credits
 
-- **Maxim Yadoshlivyy:** Collaborator in this academic project.
+- Thanks for **Maxim Yadoshlivyy:**, valuable collaborator in this academic project.
