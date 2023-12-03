@@ -64,3 +64,7 @@ The primary objective of this tool section is to offer users an intuitive graphi
 4. Users can click on any country to access the DNS stability graph specific to that country. They can select two dates and have the option to include additional countries for comparison if desired.
 5. The user is presented with a graph displaying the changes in RTT to DNS for each day within the selected date range. They have the option to focus on a specific period within the graph using the bar located at the bottom.
 6. The user can click on any of the dots representing a specific day, which will redirect them back to the DNS map for the chosen day.
+
+# Credits
+
+- **Maxim Yadoshlivyy:** Collaborator in this academic project.
